@@ -1,0 +1,67 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { createBrowserRouter, redirect } from 'react-router';
+import { RouterProvider } from 'react-router/dom';
+
+import { authClient } from './app/auth-client.ts';
+import ChatBot from './app/routes/ChatBot.tsx';
+import Layout from './app/routes/Layout.tsx';
+import Login from './app/routes/login.tsx';
+import Tasks from './app/routes/tasks.tsx';
+import Thought from './app/routes/thought.tsx';
+import ThoughtsTimeline from './app/routes/thoughtstimeline.tsx';
+import TimesheetView from './app/routes/timesheet.tsx';
+
+async function requiresAuth() {
+  const session = await authClient.getSession();
+  console.log('Session:', session);
+  if (!session) {
+    throw redirect('/login');
+  }
+  return null;
+}
+
+const router = createBrowserRouter([
+  {
+    Component: Layout,
+    loader: requiresAuth,
+    children: [
+      {
+        path: '/',
+        Component: ChatBot,
+      },
+      {
+        path: '/thought',
+        Component: Thought,
+      },
+      {
+        path: '/thoughtstimeline',
+        Component: ThoughtsTimeline,
+      },
+      {
+        path: '/tasks',
+        Component: Tasks,
+      },
+      {
+        path: '/timesheet',
+        Component: TimesheetView,
+      },
+    ],
+  },
+  {
+    path: '/login',
+    Component: Login,
+  },
+]);
+const root = createRoot(document.getElementById('root') as HTMLElement);
+
+const queryClient = new QueryClient({});
+
+root.render(
+  <StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
+  </StrictMode>,
+);

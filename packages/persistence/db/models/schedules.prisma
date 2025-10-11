@@ -1,0 +1,17 @@
+model Schedules {
+  id           String @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  userId       String
+  /// Title of the task (displayed to the user)
+  title        String
+  /// Optional instructions/details for executing the task
+  instructions String
+  /// Standard cron expression describing the schedule (e.g., "0 9 * * *")
+  cron         String
+
+  updatedAt DateTime @updatedAt
+
+  /// Soft toggle for activation
+  enabled Boolean @default(true)
+
+  @@index([userId])
+}

@@ -1,0 +1,55 @@
+{
+  "name": "db",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/persistence/db/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "dependsOn": ["bundle"],
+      "command": "node apps/backend/openapi.ts"
+    },
+    "bundle": {
+      "dependsOn": ["generate"],
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"]
+    },
+    "generate": {
+      "command": "prisma generate --schema ./",
+      "options": {
+        "cwd": "{projectRoot}"
+      }
+    },
+    "prisma": {
+      "command": "prisma",
+      "options": {
+        "cwd": "{projectRoot}"
+      }
+    },
+    "migrate": {
+      "command": "prisma migrate dev --schema ./",
+      "options": {
+        "cwd": "{projectRoot}"
+      }
+    },
+    "deploy": {
+      "command": "prisma migrate deploy --schema ./",
+      "options": {
+        "cwd": "{projectRoot}"
+      }
+    },
+
+    "reset": {
+      "command": "prisma migrate reset --schema ./",
+      "options": {
+        "cwd": "{projectRoot}"
+      }
+    },
+    "pull": {
+      "command": "prisma db pull --schema ./",
+      "options": {
+        "cwd": "{projectRoot}"
+      }
+    }
+  }
+}

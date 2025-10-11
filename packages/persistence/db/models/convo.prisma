@@ -1,0 +1,82 @@
+
+model Chat {
+  id        String    @id
+  userId    String
+  title     String?
+  messages  Message[]
+}
+
+model Message {
+  id     String @id
+  chatId String
+  role   String
+
+  // Metadata
+  model             String?
+  inputTokens       Int?
+  outputTokens      Int?
+  totalTokens       Int?
+  reasoningTokens   Int?
+  cachedInputTokens Int?
+  finishReason      String?
+
+  // Audit
+  traceId   String? // OTEL trace correlation
+
+  // Relations
+  chat  Chat   @relation(fields: [chatId], references: [id])
+  parts Part[]
+}
+
+model Part {
+  id        String @id @default(uuid(7))
+  messageId String
+  type      String
+
+  // Text fields
+  text_text String?
+
+  // Reasoning fields
+  reasoning_text String?
+
+  // File fields
+  file_mediaType String?
+  file_filename  String?
+  file_url       String?
+
+  // Source url fields
+  source_url_sourceId String?
+  source_url_url      String?
+  source_url_title    String?
+
+  // Source document fields
+  source_document_sourceId  String?
+  source_document_mediaType String?
+  source_document_title     String?
+  source_document_filename  String?
+
+  // shared tool call columns
+  tool_toolCallId String?
+  tool_toolName   String?
+  tool_state      String?
+  tool_errorText  String?
+  tool_input      String?
+  tool_output     String?
+
+  // Provider metadata (opaque JSON per provider)
+  providerMetadata Json?
+
+  // Relations
+  message Message @relation(fields: [messageId], references: [id])
+}
+
+model CommandPalette {
+  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  userId    String
+  projectId String
+  label     String
+  prompt    String
+  prefix    String
+  icon      String
+  updatedAt DateTime @updatedAt
+}

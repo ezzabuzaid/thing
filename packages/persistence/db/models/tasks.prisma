@@ -1,0 +1,87 @@
+model TasksList {
+    id    String @id @default(dbgenerated("uuidv7()")) @db.Uuid
+    title String @unique
+
+    // References
+    userId String
+
+    // Audit
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    tasks Task[]
+
+    // Constraints
+    @@index([userId])
+}
+
+model Task {
+    id String @id @default(dbgenerated("uuidv7()")) @db.Uuid
+
+    title String
+
+    notes  String?   @db.Text
+    status String    @default("needsAction")
+    due    DateTime?
+
+    // References
+    taskListId String @db.Uuid
+
+    // Audit
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    // Relations
+    taskList TasksList   @relation(fields: [taskListId], references: [id], onDelete: Cascade)
+    subtasks Subtask[]
+    media    TaskMedia[]
+
+    // Constraints
+    @@index([taskListId])
+    @@index([status])
+    @@index([due])
+}
+
+model Subtask {
+    id String @id @default(dbgenerated("uuidv7()")) @db.Uuid
+
+    title String
+
+    notes  String?   @db.Text
+    status String    @default("needsAction")
+    due    DateTime?
+
+    // References
+    taskId String @db.Uuid
+
+    // Relations
+    task  Task        @relation(fields: [taskId], references: [id], onDelete: Cascade)
+    media SubtaskMedia[]
+
+    // Audit
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+    mediaId   String?   @db.Uuid
+
+    // Constraints
+    @@index([taskId])
+    @@index([status])
+    @@index([due])
+}
+
+model TaskMedia {
+    id        String  @id @default(dbgenerated("uuidv7()")) @db.Uuid
+    mediaId   String  @db.Uuid
+    taskId    String @db.Uuid
+
+    task    Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+    media   Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+}
+model SubtaskMedia {
+    id        String  @id @default(dbgenerated("uuidv7()")) @db.Uuid
+    mediaId   String  @db.Uuid
+    subtaskId String @db.Uuid
+
+    subtask Subtask @relation(fields: [subtaskId], references: [id], onDelete: Cascade)
+    media   Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+}

@@ -1,0 +1,18 @@
+model Media {
+    id          String @id @default(dbgenerated("uuidv7()")) @db.Uuid
+    name        String
+    path        String
+    contentType String
+    size        Int?
+    userId      String
+
+    // Audit
+    updatedAt DateTime  @updatedAt
+
+    // Hidden back-relations to satisfy Prisma while keeping Media unaware in the client
+    subtaskMedia    SubtaskMedia[]    @ignore
+    taskMedias    TaskMedia[]    @ignore
+
+    // Constraints
+    @@index([userId])
+}

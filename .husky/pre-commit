@@ -1,0 +1,3 @@
+# nx run-many -t lint && npx lint-staged
+
+# nx lint for nx controled files and lint-staged for those nx didn't control

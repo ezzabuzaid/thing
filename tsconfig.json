@@ -1,0 +1,31 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/shadcn"
+    },
+    {
+      "path": "./packages/ui"
+    },
+    {
+      "path": "./packages/isomorphic"
+    },
+    {
+      "path": "./packages/client"
+    },
+    {
+      "path": "./tools/tailwind-sync-plugin"
+    },
+    {
+      "path": "./packages/persistence/db"
+    },
+    {
+      "path": "./apps/frontend"
+    },
+    {
+      "path": "./apps/backend"
+    }
+  ]
+}

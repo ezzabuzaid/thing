@@ -1,0 +1,39 @@
+model Client {
+  id       String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  name     String    @unique @db.VarChar(160)
+  projects Project[]
+
+  // Audit field
+  updatedAt DateTime @updatedAt
+}
+
+model Project {
+  id       String      @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  clientId String      @db.Uuid
+  client   Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  name     String      @db.VarChar(160)
+  entries  HourEntry[]
+
+  // Audit field
+  updatedAt DateTime @updatedAt
+
+  @@unique([clientId, name])
+  @@index([clientId])
+}
+
+model HourEntry {
+  id         String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  projectId  String   @db.Uuid
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  date       DateTime
+  hours      String
+  billable   Boolean  @default(true)
+  note       String?  @db.Text
+  currency   String?  @default("USD")
+  hourlyRate String
+
+  // Audit field
+  updatedAt DateTime @updatedAt
+
+  @@unique([projectId, date, note], map: "uniq_entry_hint")
+}
