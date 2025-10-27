@@ -11,3 +11,15 @@ export const listSchedulesSchema = z.object({
   pageSize: z.number().min(1).max(100).default(20),
 });
 export const getScheduleByIdSchema = z.object({ id: z.string().uuid() });
+export const updateScheduleSchema = z.object({
+  title: z.string().optional(),
+  instructions: z.string().optional(),
+  cron: z.string().optional(),
+  id: z.string().uuid(),
+});
+export const toggleScheduleSchema = z.object({ id: z.string().uuid() });
+export const testRunSchema = z.object({
+  source: z.enum(['user', 'system']).optional().default('system'),
+  id: z.string().uuid(),
+});
+export const resumeScheduleSchema = z.object({ id: z.string().uuid() });

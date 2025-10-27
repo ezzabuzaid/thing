@@ -1,5 +1,5 @@
 import { openai } from '@ai-sdk/openai';
-import { agent, execute, printer } from '@deepagents/agent';
+import { agent, execute, lmstudio, printer } from '@deepagents/agent';
 
 import { bookmarksAgent } from './subagents/bookmarks.ts';
 import { tasksAgent } from './subagents/tasks.ts';
@@ -8,7 +8,10 @@ import system from './system.ts';
 
 export const faye = agent({
   name: 'Faye',
-  model: openai('gpt-4o'),
+  model:
+    process.env.NODE_ENV === 'development'
+      ? lmstudio('google/gemma-3-12b')
+      : openai('gpt-4o'),
   prompt: system(),
   handoffDescription: `A versatile and empathetic assistant designed to provide companionship, intellectual stimulation, and emotional support. Faye can help with a wide range of scenarios. If Faye is unable to assist with a specific request, it can hand off to specialized agents such as Tasks and Bookmarks.`,
   tools: {

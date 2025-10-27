@@ -1,14 +1,15 @@
 model User {
-  id            String    @id
+  id            String      @id
   name          String
   email         String
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean     @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now()) @updatedAt
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @default(now()) @updatedAt
   isAnonymous   Boolean?
   sessions      Session[]
   accounts      Account[]
+  schedules     Schedules[]
 
   @@unique([email])
   @@map("user")

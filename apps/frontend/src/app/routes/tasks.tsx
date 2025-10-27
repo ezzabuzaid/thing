@@ -1,3 +1,6 @@
+import type { TasksTree } from '@thing/client';
+import { Button, Spinner, cn } from '@thing/shadcn';
+import { useAction, useData } from '@thing/ui';
 import {
   Circle,
   CircleCheckBig,
@@ -9,10 +12,6 @@ import {
   PlusSquareIcon,
 } from 'lucide-react';
 import React, { type HTMLAttributes, useState } from 'react';
-
-import type { TasksTree } from '@agent/client';
-import { Button, Spinner, cn } from '@agent/shadcn';
-import { useAction, useData } from '@agent/ui';
 
 import * as FolderTree from '../components/FolderTree';
 import { Title } from '../components/Title.tsx';
@@ -608,7 +607,7 @@ const EditableField: React.FC<{
           onClick={(e) => e.stopPropagation()}
           placeholder={placeholder}
           className={cn(
-            'w-full bg-transparent outline-none resize-none',
+            'w-full resize-none bg-transparent outline-none',
             className,
           )}
           rows={2}
@@ -668,7 +667,7 @@ function ItemLabel({
       </p>
       <span
         className={cn(
-          'text-muted-foreground text-xs block',
+          'text-muted-foreground block text-xs',
           !notes && 'opacity-0 hover:opacity-100',
         )}
       >

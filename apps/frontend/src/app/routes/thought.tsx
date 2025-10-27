@@ -1,3 +1,4 @@
+import { useData } from '@thing/ui';
 import {
   CalendarClock,
   FileText,
@@ -6,10 +7,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
-import { useData } from '@agent/ui';
-
 import { BottomBar, Header, ThoughtCard } from '../components';
-import { useThoughts } from '../hooks/useThoughts';
 
 const bottomNavItems = [
   { label: 'Home', href: '/home', icon: HomeIcon },

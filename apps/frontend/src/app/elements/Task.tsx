@@ -1,4 +1,9 @@
-import { cn, Collapsible, CollapsibleContent, CollapsibleTrigger } from '@agent/shadcn';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+  cn,
+} from '@thing/shadcn';
 import { ChevronDownIcon, SearchIcon } from 'lucide-react';
 import type { ComponentProps } from 'react';
 

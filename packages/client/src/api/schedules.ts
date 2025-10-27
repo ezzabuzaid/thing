@@ -122,4 +122,128 @@ export default {
       return result.data;
     },
   },
+  'PATCH /schedules/{id}': {
+    schema: schedules.updateScheduleSchema,
+    output: [
+      http.Ok<outputs.UpdateSchedule>,
+      http.BadRequest<outputs.UpdateSchedule400>,
+      http.Unauthorized<outputs.UnauthorizedErr>,
+    ],
+    toRequest(input: z.input<typeof schedules.updateScheduleSchema>) {
+      return toRequest(
+        'PATCH /schedules/{id}',
+        json(input, {
+          inputHeaders: [],
+          inputQuery: [],
+          inputBody: ['title', 'instructions', 'cron'],
+          inputParams: ['id'],
+        }),
+      );
+    },
+    async dispatch(
+      input: z.input<typeof schedules.updateScheduleSchema>,
+      options: {
+        signal?: AbortSignal;
+        interceptors: Interceptor[];
+        fetch: z.infer<typeof fetchType>;
+      },
+    ) {
+      const dispatcher = new Dispatcher(options.interceptors, options.fetch);
+      const result = await dispatcher.send(this.toRequest(input), this.output);
+      return result.data;
+    },
+  },
+  'POST /schedules/{id}/pause': {
+    schema: schedules.toggleScheduleSchema,
+    output: [
+      http.Ok<outputs.ToggleSchedule>,
+      http.BadRequest<outputs.ToggleSchedule400>,
+      http.Unauthorized<outputs.UnauthorizedErr>,
+    ],
+    toRequest(input: z.input<typeof schedules.toggleScheduleSchema>) {
+      return toRequest(
+        'POST /schedules/{id}/pause',
+        empty(input, {
+          inputHeaders: [],
+          inputQuery: [],
+          inputBody: [],
+          inputParams: ['id'],
+        }),
+      );
+    },
+    async dispatch(
+      input: z.input<typeof schedules.toggleScheduleSchema>,
+      options: {
+        signal?: AbortSignal;
+        interceptors: Interceptor[];
+        fetch: z.infer<typeof fetchType>;
+      },
+    ) {
+      const dispatcher = new Dispatcher(options.interceptors, options.fetch);
+      const result = await dispatcher.send(this.toRequest(input), this.output);
+      return result.data;
+    },
+  },
+  'POST /schedules/{id}/run': {
+    schema: schedules.testRunSchema,
+    output: [
+      http.Ok<outputs.TestRun>,
+      http.BadRequest<outputs.TestRun400>,
+      http.Unauthorized<outputs.UnauthorizedErr>,
+    ],
+    toRequest(input: z.input<typeof schedules.testRunSchema>) {
+      return toRequest(
+        'POST /schedules/{id}/run',
+        json(input, {
+          inputHeaders: [],
+          inputQuery: [],
+          inputBody: ['source'],
+          inputParams: ['id'],
+        }),
+      );
+    },
+    async dispatch(
+      input: z.input<typeof schedules.testRunSchema>,
+      options: {
+        signal?: AbortSignal;
+        interceptors: Interceptor[];
+        fetch: z.infer<typeof fetchType>;
+      },
+    ) {
+      const dispatcher = new Dispatcher(options.interceptors, options.fetch);
+      const result = await dispatcher.send(this.toRequest(input), this.output);
+      return result.data;
+    },
+  },
+  'POST /schedules/{id}/resume': {
+    schema: schedules.resumeScheduleSchema,
+    output: [
+      http.Ok<outputs.ResumeSchedule>,
+      http.BadRequest<outputs.ResumeSchedule400>,
+      http.Unauthorized<outputs.UnauthorizedErr>,
+    ],
+    toRequest(input: z.input<typeof schedules.resumeScheduleSchema>) {
+      return toRequest(
+        'POST /schedules/{id}/resume',
+        empty(input, {
+          inputHeaders: [],
+          inputQuery: [],
+          inputBody: [],
+          inputParams: ['id'],
+        }),
+      );
+    },
+    async dispatch(
+      input: z.input<typeof schedules.resumeScheduleSchema>,
+      options: {
+        signal?: AbortSignal;
+        interceptors: Interceptor[];
+        fetch: z.infer<typeof fetchType>;
+      },
+    ) {
+      const dispatcher = new Dispatcher(options.interceptors, options.fetch);
+      const result = await dispatcher.send(this.toRequest(input), this.output);
+      return result.data;
+    },
+  },
 };

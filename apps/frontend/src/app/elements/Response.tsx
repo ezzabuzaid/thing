@@ -1,7 +1,6 @@
+import { cn } from '@thing/shadcn';
 import { type ComponentProps, memo } from 'react';
 import { Streamdown } from 'streamdown';
-
-import { cn } from '@agent/shadcn';
 
 type ResponseProps = ComponentProps<typeof Streamdown>;
 

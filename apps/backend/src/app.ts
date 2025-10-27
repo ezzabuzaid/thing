@@ -1,5 +1,6 @@
 import { execute } from '@deepagents/agent';
 import { serveStatic } from '@hono/node-server/serve-static';
+import { Prisma, prisma } from '@thing/db';
 import {
   InvalidToolInputError,
   NoSuchToolError,
@@ -17,8 +18,6 @@ import { HTTPException } from 'hono/http-exception';
 import { logger } from 'hono/logger';
 import { requestId } from 'hono/request-id';
 import { timing } from 'hono/timing';
-
-import { Prisma, prisma } from '@agent/db';
 
 import { faye } from './faye/faye.ts';
 import { auth } from './middlewares/auth.ts';

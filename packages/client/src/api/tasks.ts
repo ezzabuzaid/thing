@@ -60,6 +60,37 @@ export default {
       return result.data;
     },
   },
+  'POST /taskslists': {
+    schema: tasks.createTaskListSchema,
+    output: [
+      http.Created<outputs.CreateTaskList201>,
+      http.BadRequest<outputs.CreateTaskList400>,
+      http.Unauthorized<outputs.UnauthorizedErr>,
+    ],
+    toRequest(input: z.input<typeof tasks.createTaskListSchema>) {
+      return toRequest(
+        'POST /taskslists',
+        json(input, {
+          inputHeaders: [],
+          inputQuery: [],
+          inputBody: ['title'],
+          inputParams: [],
+        }),
+      );
+    },
+    async dispatch(
+      input: z.input<typeof tasks.createTaskListSchema>,
+      options: {
+        signal?: AbortSignal;
+        interceptors: Interceptor[];
+        fetch: z.infer<typeof fetchType>;
+      },
+    ) {
+      const dispatcher = new Dispatcher(options.interceptors, options.fetch);
+      const result = await dispatcher.send(this.toRequest(input), this.output);
+      return result.data;
+    },
+  },
   'GET /taskslists/{taskListId}/tasks': {
     schema: tasks.getAllTasksInListSchema,
     output: [

@@ -8,6 +8,7 @@ export type ListSchedules = {
     updatedAt: string;
     instructions: string;
     cron: string;
+    runnerId: string;
     enabled: boolean;
   }[];
   pagination: {

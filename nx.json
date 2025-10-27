@@ -117,15 +117,15 @@
       "inputs": ["production", "^production"]
     },
     "build": {
-      "syncGenerators": ["@agent/tailwind-sync-plugin:update-tailwind-globs"],
+      "syncGenerators": ["@thing/tailwind-sync-plugin:update-tailwind-globs"],
       "dependsOn": ["^build"]
     },
     "dev": {
-      "syncGenerators": ["@agent/tailwind-sync-plugin:update-tailwind-globs"],
+      "syncGenerators": ["@thing/tailwind-sync-plugin:update-tailwind-globs"],
       "dependsOn": ["^build"]
     },
     "serve": {
-      "syncGenerators": ["@agent/tailwind-sync-plugin:update-tailwind-globs"],
+      "syncGenerators": ["@thing/tailwind-sync-plugin:update-tailwind-globs"],
       "dependsOn": ["^build"]
     }
   },

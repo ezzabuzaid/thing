@@ -9,7 +9,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig(() => ({
   root: __dirname,
-  cacheDir: '../../node_modules/.vite/apps/thought',
+  cacheDir: '../../node_modules/.vite/apps/thoughts',
   server: {
     port: 5173,
     host: 'localhost',
@@ -69,8 +69,5 @@ export default defineConfig(() => ({
     commonjsOptions: {
       transformMixedEsModules: true,
     },
-  },
-  optimizeDeps: {
-    exclude: ['date-fns', '@tanstack/react-table'],
   },
 }));

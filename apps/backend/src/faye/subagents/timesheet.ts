@@ -1,9 +1,8 @@
 import { groq } from '@ai-sdk/groq';
 import { type Agent, agent } from '@deepagents/agent';
+import { type Prisma, prisma } from '@thing/db';
 import { tool } from 'ai';
 import z from 'zod';
-
-import { type Prisma, prisma } from '@agent/db';
 
 import timeContext from '../time-context.ts';
 

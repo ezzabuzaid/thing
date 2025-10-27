@@ -1,50 +1,49 @@
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Textarea,
+  cn,
+} from '@thing/shadcn';
 import type { ChatStatus, FileUIPart } from 'ai';
 import {
-	ImageIcon,
-	Loader2Icon,
-	PaperclipIcon,
-	PlusIcon,
-	SendIcon,
-	SquareIcon,
-	XIcon,
+  ImageIcon,
+  Loader2Icon,
+  PaperclipIcon,
+  PlusIcon,
+  SendIcon,
+  SquareIcon,
+  XIcon,
 } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import {
-	type ChangeEventHandler,
-	Children,
-	type ComponentProps,
-	type FormEvent,
-	type FormEventHandler,
-	Fragment,
-	type HTMLAttributes,
-	type KeyboardEventHandler,
-	type RefObject,
-	createContext,
-	useCallback,
-	useContext,
-	useEffect,
-	useLayoutEffect,
-	useMemo,
-	useRef,
-	useState,
+  type ChangeEventHandler,
+  Children,
+  type ComponentProps,
+  type FormEvent,
+  type FormEventHandler,
+  Fragment,
+  type HTMLAttributes,
+  type KeyboardEventHandler,
+  type RefObject,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
 } from 'react';
 
-import {
-	Button,
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-	Textarea,
-	cn,
-} from '@agent/shadcn';
-
-type AttachmentsContext = {
+type AttachmentsContextValue = {
   files: (FileUIPart & { id: string })[];
   add: (files: File[] | FileList) => void;
   remove: (id: string) => void;
@@ -53,7 +52,7 @@ type AttachmentsContext = {
   fileInputRef: RefObject<HTMLInputElement | null>;
 };
 
-const AttachmentsContext = createContext<AttachmentsContext | null>(null);
+const AttachmentsContext = createContext<AttachmentsContextValue | null>(null);
 
 export const usePromptInputAttachments = () => {
   const context = useContext(AttachmentsContext);
@@ -406,7 +405,7 @@ export const PromptInput = ({
     onSubmit({ text: event.currentTarget.message.value, files }, event);
   };
 
-  const ctx = useMemo<AttachmentsContext>(
+  const ctx = useMemo<AttachmentsContextValue>(
     () => ({
       files: items.map((item) => ({ ...item, id: item.id })),
       add,

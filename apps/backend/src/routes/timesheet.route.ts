@@ -1,7 +1,6 @@
+import { prisma } from '@thing/db';
 import { Hono } from 'hono';
 import { z } from 'zod';
-
-import { prisma } from '@agent/db';
 
 import { authenticate } from '../middlewares/middleware.ts';
 import { validate } from '../middlewares/validator.ts';

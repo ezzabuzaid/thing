@@ -1,5 +1,5 @@
 {
-  "name": "@agent/tailwind-sync-plugin",
+  "name": "@thing/tailwind-sync-plugin",
   "version": "0.0.1",
   "private": true,
   "type": "module",

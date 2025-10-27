@@ -1,5 +1,5 @@
 {
-  "name": "@agent/db",
+  "name": "@thing/db",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -17,6 +17,6 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "prisma": "^6.17.0"
+    "prisma": "^6.18.0"
   }
 }

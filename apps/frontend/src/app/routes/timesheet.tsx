@@ -1,7 +1,4 @@
-import { CalendarIcon, DollarSign, Timer, UsersRound } from 'lucide-react';
-import React from 'react';
-
-import type { TimesheetTree } from '@agent/client';
+import type { TimesheetTree } from '@thing/client';
 import {
   Accordion,
   AccordionContent,
@@ -12,12 +9,14 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from '@agent/shadcn';
-import { useData } from '@agent/ui';
+} from '@thing/shadcn';
+import { useData } from '@thing/ui';
+import { CalendarIcon, DollarSign, Timer, UsersRound } from 'lucide-react';
+import React from 'react';
 
 import { Title } from '../components/Title';
 
-export default function TimesheetView() {
+export default function Timesheet() {
   const { data, isLoading } = useData('GET /timesheet/tree');
 
   const defaultExpanded = React.useMemo(() => {

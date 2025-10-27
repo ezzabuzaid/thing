@@ -1,9 +1,8 @@
+import { prisma } from '@thing/db';
 import { OAuth2Client } from 'google-auth-library';
 import { google } from 'googleapis';
 import { Hono } from 'hono';
 import { z } from 'zod';
-
-import { prisma } from '@agent/db';
 
 import { getTaskLists, getTasks } from '../faye/subagents/gtasks.ts';
 import { auth } from '../middlewares/auth.ts';

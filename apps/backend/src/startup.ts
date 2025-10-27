@@ -1,6 +1,5 @@
+import { prisma } from '@thing/db';
 import z from 'zod';
-
-import { prisma } from '@agent/db';
 
 import { parse } from './middlewares/validator.ts';
 
@@ -10,6 +9,7 @@ const env = z.object({
   ALLOWED_ORIGINS: z.string().default(''),
   CONNECTION_STRING: z.string(),
   GROQ_API_KEY: z.string(),
+  QSTASH_TOKEN: z.string(),
 });
 
 try {

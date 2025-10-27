@@ -1,7 +1,5 @@
-import { anonymousClient } from 'better-auth/client/plugins';
+import { getOrigin } from '@thing/ui';
 import { createAuthClient } from 'better-auth/react';
-
-import { getOrigin } from '@agent/ui';
 
 const resolveBaseURL = () => {
   const envUrl =

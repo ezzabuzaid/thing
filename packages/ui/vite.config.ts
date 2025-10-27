@@ -41,8 +41,8 @@ export default defineConfig(() => ({
         '@tanstack/react-query',
         '@tanstack/react-form',
         'react-router',
-        '@agent/client',
-        '@agent/shadcn',
+        '@thing/client',
+        '@thing/shadcn',
       ],
       output: {
         assetFileNames: 'assets/[name][extname]',

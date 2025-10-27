@@ -1,5 +1,5 @@
 {
-  "name": "@agent/client",
+  "name": "@thing/client",
   "version": "0.0.1",
   "private": true,
   "type": "module",

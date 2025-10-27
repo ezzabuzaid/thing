@@ -27,6 +27,7 @@
       }
     },
     "migrate": {
+      "dependsOn": ["build"],
       "command": "prisma migrate dev --schema ./",
       "options": {
         "cwd": "{projectRoot}"

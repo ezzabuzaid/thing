@@ -1,8 +1,7 @@
 import type { StandardSchemaV1Issue } from '@tanstack/react-form';
+import { APIError, ParseError } from '@thing/client';
+import { cn } from '@thing/shadcn';
 import { useId } from 'react';
-
-import { APIError, ParseError } from '@agent/client';
-import { cn } from '@agent/shadcn';
 
 export function FieldMessage(props: {
   errors: (StandardSchemaV1Issue | undefined)[];

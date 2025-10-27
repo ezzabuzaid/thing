@@ -8,10 +8,11 @@ import { authClient } from './app/auth-client.ts';
 import ChatBot from './app/routes/ChatBot.tsx';
 import Layout from './app/routes/Layout.tsx';
 import Login from './app/routes/login.tsx';
+import Schedules from './app/routes/schedules.tsx';
 import Tasks from './app/routes/tasks.tsx';
 import Thought from './app/routes/thought.tsx';
 import ThoughtsTimeline from './app/routes/thoughtstimeline.tsx';
-import TimesheetView from './app/routes/timesheet.tsx';
+import Timesheet from './app/routes/timesheet.tsx';
 
 async function requiresAuth() {
   const session = await authClient.getSession();
@@ -44,8 +45,12 @@ const router = createBrowserRouter([
         Component: Tasks,
       },
       {
+        path: '/schedules',
+        Component: Schedules,
+      },
+      {
         path: '/timesheet',
-        Component: TimesheetView,
+        Component: Timesheet,
       },
     ],
   },

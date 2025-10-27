@@ -1,3 +1,4 @@
+import { Spinner, cn } from '@thing/shadcn';
 import { AnimatePresence, type Variants, motion } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 import React, {
@@ -9,8 +10,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-
-import { Spinner, cn } from '@agent/shadcn';
 
 import { Thumbnail, UploadField } from './UploadField.tsx';
 

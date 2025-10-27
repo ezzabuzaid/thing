@@ -1,12 +1,6 @@
-import {
-  type PropsWithChildren,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import { cn } from '@thing/shadcn';
+import { type PropsWithChildren, useCallback, useState } from 'react';
 import { type FileRejection, useDropzone } from 'react-dropzone';
-
-import { cn } from '@agent/shadcn';
 
 export interface UploadFieldProps {
   name: string;

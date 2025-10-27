@@ -1,16 +1,14 @@
 import { useControllableState } from '@radix-ui/react-use-controllable-state';
-import { ChevronDownIcon, ZapIcon } from 'lucide-react';
-import { BrainIcon, DotIcon, type LucideIcon } from 'lucide-react';
-import type { ComponentProps, ReactNode } from 'react';
-import { createContext, memo, useContext } from 'react';
-
 import {
   Badge,
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
   cn,
-} from '@agent/shadcn';
+} from '@thing/shadcn';
+import { BrainIcon, ZapIcon } from 'lucide-react';
+import type { ComponentProps, ReactNode } from 'react';
+import { createContext, memo, useContext } from 'react';
 
 type ChainOfThoughtContextValue = {
   isOpen: boolean;
@@ -132,7 +130,7 @@ export const ChainOfThoughtStep = memo(
         {...props}
       >
         <div className="relative mt-0.5">
-          {icon??<ZapIcon className="size-4 text-green-600" />}
+          {icon ?? <ZapIcon className="size-4 text-green-600" />}
           <div className="bg-border absolute top-7 bottom-0 left-1/2 -mx-px w-px" />
         </div>
         <div className="flex-1 space-y-2">

@@ -1,10 +1,9 @@
 import { randomUUID } from 'node:crypto';
 
+import { prisma } from '@thing/db';
 import admin from 'firebase-admin';
 import { Hono } from 'hono';
 import { z } from 'zod';
-
-import { prisma } from '@agent/db';
 
 import { authenticate } from '../middlewares/middleware.ts';
 import { validate } from '../middlewares/validator.ts';

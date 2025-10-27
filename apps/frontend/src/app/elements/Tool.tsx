@@ -1,3 +1,10 @@
+import {
+  Badge,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+  cn,
+} from '@thing/shadcn';
 import type { ToolUIPart } from 'ai';
 import {
   CheckCircleIcon,
@@ -8,14 +15,6 @@ import {
   XCircleIcon,
 } from 'lucide-react';
 import type { ComponentProps, ReactNode } from 'react';
-
-import {
-  Badge,
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-  cn,
-} from '@agent/shadcn';
 
 import { CodeBlock } from './CodeBlock.tsx';
 

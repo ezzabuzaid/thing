@@ -1,6 +1,6 @@
 import type * as models from '../index.ts';
 
-export type CreateSchedule201 = {
+export type UpdateSchedule = {
   id: string;
   userId: string;
   title: string;
@@ -11,4 +11,4 @@ export type CreateSchedule201 = {
   enabled: boolean;
 };
 
-export type CreateSchedule400 = models.ValidationError;
+export type UpdateSchedule400 = models.ValidationError;

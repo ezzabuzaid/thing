@@ -1,4 +1,6 @@
 import { useChat } from '@ai-sdk/react';
+import { Button, cn } from '@thing/shadcn';
+import { client } from '@thing/ui';
 import {
   type ChatStatus,
   DefaultChatTransport,
@@ -15,16 +17,12 @@ import {
   ClockIcon,
   Loader,
   MessageSquare,
-  X,
   XCircleIcon,
   ZapIcon,
 } from 'lucide-react';
 import { Fragment, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { titlecase } from 'stringcase';
-
-import { Button } from '@agent/shadcn';
-import { client } from '@agent/ui';
+import { pascalcase, titlecase } from 'stringcase';
 
 import { Title } from '../components/Title.tsx';
 import {
@@ -90,12 +88,12 @@ export default function ChatBot() {
 
   return (
     <div className="relative flex h-full flex-col justify-between">
-      <div className="container mx-auto px-4">
+      <div className="mx-auto w-full max-w-3xl px-4">
         <Title>Faye</Title>
       </div>
 
       <main className="flex h-[calc(100%-(10rem+4rem))] flex-col items-center justify-center">
-        <Conversation className="container w-full">
+        <Conversation className="w-full max-w-3xl">
           <ConversationContent className="h-full">
             {messages.length === 0 ? (
               <ConversationEmptyState
@@ -118,7 +116,7 @@ export default function ChatBot() {
       </main>
 
       <footer className="bg-background right-0 bottom-0 left-0 z-10">
-        <div className="container mx-auto p-4">
+        <div className="mx-auto max-w-3xl p-4">
           <div className="relative">
             <PromptInput
               className="relative mt-4"
@@ -182,8 +180,12 @@ function AgentTransfer({ part }: { part: ToolUIPart }) {
     : [];
   return (
     <>
-      <p className="my-2 font-bold">
-        {titlecase(part.type.replace('tool-transfer_to_', ''))}
+      <p className="my-2 font-semibold">
+        {pascalcase(part.type.replace('tool-transfer_to_', ''))}(
+        <span className="text-destructive whitespace-nowrap">
+          {JSON.stringify(part.input)}
+        </span>
+        )
       </p>
       {(output as UIMessagePart<any, any>[]).map((part, partIndex) => {
         if (
@@ -495,8 +497,11 @@ function MessageContainer({
   const process = toThoughtProcess(message.parts);
   return (
     <Message from={message.role} key={message.id}>
-      <MessageContent variant={'flat'}>
-        {message.role === 'assistant' && process.length>0 && (
+      <MessageContent
+        className={cn(message.role !== 'user' ? 'rounded-none' : '')}
+        variant="flat"
+      >
+        {message.role === 'assistant' && process.length > 0 && (
           <ChainOfThought className="mt-4" defaultOpen={status === 'streaming'}>
             <ChainOfThoughtHeader>
               {status === 'ready' ? 'Thought process' : 'Thinking...'}

@@ -8,8 +8,7 @@ COPY package-lock.json package.json ./
 COPY --parents **/package.json .
 
 # Cache .nx directory to speed up builds
-RUN npm config set registry https://registry.npmjs.org/
-RUN --mount=type=cache,target=/root/.npm npm ci --legacy-peer-deps --verbose
+RUN --mount=type=cache,target=/root/.npm npm i --legacy-peer-deps
 COPY . .
 
 # Keep the API URL empty to use the same host
@@ -47,7 +46,6 @@ COPY --from=builder /app/packages/persistence/db/schema.prisma .
 
 # Install production dependencies
 COPY --from=builder /app/package.json /app/package-lock.json ./
-RUN npm config set registry https://registry.npmjs.org/
 RUN --mount=type=cache,id=prod-deps,target=/root/.npm npm ci --legacy-peer-deps --omit=dev --ignore-scripts
 
 # Copy frontend

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export const tasksListSchema = z.object({}).catchall(z.unknown());
+export const createTaskListSchema = z.object({ title: z.string() });
 export const getAllTasksInListSchema = z.object({ taskListId: z.string() });
 export const createTaskSchema = z.object({
   title: z.string().optional(),

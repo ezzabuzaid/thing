@@ -1,28 +1,8 @@
 import {
-  Bell,
-  ClipboardCheck,
-  DollarSign,
-  GalleryVerticalEnd,
-  Handshake,
-  LibraryBig,
-  ListTodo,
-  type LucideIcon,
-} from 'lucide-react';
-import { Outlet } from 'react-router';
-
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-  Separator,
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
@@ -31,8 +11,18 @@ import {
   SidebarProvider,
   SidebarRail,
   SidebarTrigger,
-  useSidebar,
-} from '@agent/shadcn';
+} from '@thing/shadcn';
+import {
+  Bell,
+  DollarSign,
+  GalleryVerticalEnd,
+  Handshake,
+  LibraryBig,
+  ListTodo,
+  type LucideIcon,
+  Repeat,
+} from 'lucide-react';
+import { Outlet } from 'react-router';
 
 type SidebarItem = {
   name: string;
@@ -53,7 +43,7 @@ const sidebar: SidebarItem[] = [
   {
     name: 'Schedules',
     url: 'schedules',
-    icon: ClipboardCheck,
+    icon: Repeat,
   },
   {
     name: 'Reminders',
@@ -125,7 +115,7 @@ export function TeamSwitcher() {
         <GalleryVerticalEnd className="size-4" />
       </div>
       <div className="grid flex-1 text-left text-sm leading-tight">
-        <span className="truncate font-medium">Adam</span>
+        <span className="truncate font-medium">Thing</span>
       </div>
     </div>
   );

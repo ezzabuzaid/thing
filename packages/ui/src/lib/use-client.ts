@@ -10,8 +10,7 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-
-import { Client, type Endpoints } from '@agent/client';
+import { Client, type Endpoints } from '@thing/client';
 
 export function getOrigin(defaultOrigin = ''): string {
   let origin = '';
