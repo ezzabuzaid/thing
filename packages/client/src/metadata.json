@@ -37,6 +37,7 @@
     "/outputs/list-schedules.ts",
     "/outputs/get-schedule-by-id.ts",
     "/outputs/update-schedule.ts",
+    "/outputs/archive-schedule.ts",
     "/outputs/toggle-schedule.ts",
     "/outputs/test-run.ts",
     "/outputs/resume-schedule.ts",
@@ -62,5 +63,9 @@
     "/pagination/offset-pagination.ts",
     "/pagination/page-pagination.ts"
   ],
-  "userFiles": ["/dist/**", "/build/**", "/readme.md"]
+  "userFiles": [
+    "/dist/**",
+    "/build/**",
+    "/readme.md"
+  ]
 }

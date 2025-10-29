@@ -9,7 +9,9 @@ export type ListSchedules = {
     instructions: string;
     cron: string;
     runnerId: string;
+    connectors: string[];
     enabled: boolean;
+    deletedAt: string;
   }[];
   pagination: {
     total: number;

@@ -8,7 +8,9 @@ export type UpdateSchedule = {
   instructions: string;
   cron: string;
   runnerId: string;
+  connectors: string[];
   enabled: boolean;
+  deletedAt: string;
 };
 
 export type UpdateSchedule400 = models.ValidationError;

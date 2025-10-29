@@ -1,14 +1,16 @@
 model Schedules {
-  id           String @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  id           String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
   title        String
   instructions String
   cron         String
   runnerId     String
+  connectors   String[] @default([])
 
   enabled Boolean @default(true)
 
   // Audits
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   // References
   userId String

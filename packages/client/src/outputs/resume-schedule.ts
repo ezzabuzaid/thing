@@ -8,7 +8,9 @@ export type ResumeSchedule = {
   instructions: string;
   cron: string;
   runnerId: string;
+  connectors: string[];
   enabled: boolean;
+  deletedAt: string;
 };
 
 export type ResumeSchedule400 = models.ValidationError;

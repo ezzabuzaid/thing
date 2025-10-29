@@ -1,3 +1,4 @@
+export * from './archive-schedule.ts';
 export * from './complete-subtask.ts';
 export * from './complete-task.ts';
 export * from './create-schedule.ts';

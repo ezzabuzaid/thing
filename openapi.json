@@ -56,9 +56,7 @@
             }
           }
         ],
-        "tags": [
-          "chats"
-        ],
+        "tags": ["chats"],
         "description": "Get a paginated list of chat conversations for the authenticated user. Returns chats ordered by creation date with basic metadata.",
         "responses": {
           "200": {
@@ -82,15 +80,11 @@
                                     "type": "number"
                                   }
                                 },
-                                "required": [
-                                  "messages"
-                                ],
+                                "required": ["messages"],
                                 "additionalProperties": false
                               }
                             },
-                            "required": [
-                              "_count"
-                            ],
+                            "required": ["_count"],
                             "additionalProperties": false
                           },
                           {
@@ -113,11 +107,7 @@
                                 ]
                               }
                             },
-                            "required": [
-                              "id",
-                              "userId",
-                              "title"
-                            ],
+                            "required": ["id", "userId", "title"],
                             "additionalProperties": false
                           }
                         ]
@@ -156,10 +146,7 @@
                       "additionalProperties": false
                     }
                   },
-                  "required": [
-                    "records",
-                    "pagination"
-                  ],
+                  "required": ["records", "pagination"],
                   "additionalProperties": false
                 }
               }
@@ -205,9 +192,7 @@
             }
           }
         ],
-        "tags": [
-          "chats"
-        ],
+        "tags": ["chats"],
         "description": "Get a specific chat conversation by ID. Returns the chat details along with message count.",
         "responses": {
           "200": {
@@ -452,9 +437,7 @@
                                     }
                                   }
                                 },
-                                "required": [
-                                  "parts"
-                                ],
+                                "required": ["parts"],
                                 "additionalProperties": false
                               },
                               {
@@ -569,9 +552,7 @@
                           }
                         }
                       },
-                      "required": [
-                        "messages"
-                      ],
+                      "required": ["messages"],
                       "additionalProperties": false
                     },
                     {
@@ -594,11 +575,7 @@
                           ]
                         }
                       },
-                      "required": [
-                        "id",
-                        "userId",
-                        "title"
-                      ],
+                      "required": ["id", "userId", "title"],
                       "additionalProperties": false
                     }
                   ]
@@ -644,18 +621,14 @@
             }
           }
         ],
-        "tags": [
-          "chats"
-        ],
+        "tags": ["chats"],
         "description": "Update a chat conversation's title or other metadata.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "required": [
-                  "title"
-                ],
+                "required": ["title"],
                 "type": "object",
                 "properties": {
                   "title": {
@@ -693,11 +666,7 @@
                       ]
                     }
                   },
-                  "required": [
-                    "id",
-                    "userId",
-                    "title"
-                  ],
+                  "required": ["id", "userId", "title"],
                   "additionalProperties": false
                 }
               }
@@ -741,9 +710,7 @@
             }
           }
         ],
-        "tags": [
-          "chats"
-        ],
+        "tags": ["chats"],
         "description": "Delete a chat conversation and all its associated messages.",
         "responses": {
           "204": {
@@ -797,9 +764,7 @@
             }
           }
         ],
-        "tags": [
-          "chats"
-        ],
+        "tags": ["chats"],
         "description": "Delete a specific message from a chat conversation.",
         "responses": {
           "204": {
@@ -873,9 +838,7 @@
             }
           }
         ],
-        "tags": [
-          "thoughts"
-        ],
+        "tags": ["thoughts"],
         "description": "Get a paginated list of thoughts ordered by last update time. Includes bookmark relation when present.",
         "responses": {
           "200": {
@@ -986,9 +949,7 @@
                                 ]
                               }
                             },
-                            "required": [
-                              "bookmark"
-                            ],
+                            "required": ["bookmark"],
                             "additionalProperties": false
                           },
                           {
@@ -1001,10 +962,7 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "id",
-                              "updatedAt"
-                            ],
+                            "required": ["id", "updatedAt"],
                             "additionalProperties": false
                           }
                         ]
@@ -1043,10 +1001,7 @@
                       "additionalProperties": false
                     }
                   },
-                  "required": [
-                    "records",
-                    "pagination"
-                  ],
+                  "required": ["records", "pagination"],
                   "additionalProperties": false
                 }
               }
@@ -1083,20 +1038,14 @@
       "post": {
         "operationId": "createSchedule",
         "parameters": [],
-        "tags": [
-          "schedules"
-        ],
+        "tags": ["schedules"],
         "description": "Create a schedule and schedule it with pg-boss. Returns the created schedule.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "required": [
-                  "title",
-                  "instructions",
-                  "cron"
-                ],
+                "required": ["title", "instructions", "cron"],
                 "type": "object",
                 "properties": {
                   "title": {
@@ -1113,6 +1062,14 @@
                   },
                   "enabled": {
                     "type": "boolean"
+                  },
+                  "connectors": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": ["reddit", "web search", "hackernews"]
+                    },
+                    "maxItems": 3
                   }
                 }
               }
@@ -1148,8 +1105,24 @@
                     "runnerId": {
                       "type": "string"
                     },
+                    "connectors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
                     "enabled": {
                       "type": "boolean"
+                    },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -1160,7 +1133,9 @@
                     "instructions",
                     "cron",
                     "runnerId",
-                    "enabled"
+                    "connectors",
+                    "enabled",
+                    "deletedAt"
                   ],
                   "additionalProperties": false
                 }
@@ -1218,9 +1193,7 @@
             }
           }
         ],
-        "tags": [
-          "schedules"
-        ],
+        "tags": ["schedules"],
         "description": "List schedules for the authenticated user (paginated).",
         "responses": {
           "200": {
@@ -1256,8 +1229,24 @@
                           "runnerId": {
                             "type": "string"
                           },
+                          "connectors": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
                           "enabled": {
                             "type": "boolean"
+                          },
+                          "deletedAt": {
+                            "anyOf": [
+                              {
+                                "type": "null"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
                           }
                         },
                         "required": [
@@ -1268,7 +1257,9 @@
                           "instructions",
                           "cron",
                           "runnerId",
-                          "enabled"
+                          "connectors",
+                          "enabled",
+                          "deletedAt"
                         ],
                         "additionalProperties": false
                       }
@@ -1306,10 +1297,7 @@
                       "additionalProperties": false
                     }
                   },
-                  "required": [
-                    "records",
-                    "pagination"
-                  ],
+                  "required": ["records", "pagination"],
                   "additionalProperties": false
                 }
               }
@@ -1356,9 +1344,7 @@
             }
           }
         ],
-        "tags": [
-          "schedules"
-        ],
+        "tags": ["schedules"],
         "description": "Get a single schedule by id if owned by the user.",
         "responses": {
           "200": {
@@ -1427,9 +1413,7 @@
                           }
                         }
                       },
-                      "required": [
-                        "runs"
-                      ],
+                      "required": ["runs"],
                       "additionalProperties": false
                     },
                     {
@@ -1456,8 +1440,24 @@
                         "runnerId": {
                           "type": "string"
                         },
+                        "connectors": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
                         "enabled": {
                           "type": "boolean"
+                        },
+                        "deletedAt": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
                         }
                       },
                       "required": [
@@ -1468,7 +1468,9 @@
                         "instructions",
                         "cron",
                         "runnerId",
-                        "enabled"
+                        "connectors",
+                        "enabled",
+                        "deletedAt"
                       ],
                       "additionalProperties": false
                     }
@@ -1516,9 +1518,7 @@
             }
           }
         ],
-        "tags": [
-          "schedules"
-        ],
+        "tags": ["schedules"],
         "description": "Update an existing schedule (title, cron, instructions, enabled).",
         "requestBody": {
           "required": false,
@@ -1538,6 +1538,14 @@
                   "cron": {
                     "type": "string",
                     "minLength": 1
+                  },
+                  "connectors": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": ["reddit", "web search", "hackernews"]
+                    },
+                    "maxItems": 3
                   }
                 }
               }
@@ -1573,8 +1581,24 @@
                     "runnerId": {
                       "type": "string"
                     },
+                    "connectors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
                     "enabled": {
                       "type": "boolean"
+                    },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -1585,7 +1609,116 @@
                     "instructions",
                     "cron",
                     "runnerId",
-                    "enabled"
+                    "connectors",
+                    "enabled",
+                    "deletedAt"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ValidationError"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedErr"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "archiveSchedule",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "tags": ["schedules"],
+        "description": "Archive a schedule: disables it, removes remote runner, and soft deletes it.",
+        "responses": {
+          "200": {
+            "description": "Response for 200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "userId": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    },
+                    "instructions": {
+                      "type": "string"
+                    },
+                    "cron": {
+                      "type": "string"
+                    },
+                    "runnerId": {
+                      "type": "string"
+                    },
+                    "connectors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "userId",
+                    "title",
+                    "updatedAt",
+                    "instructions",
+                    "cron",
+                    "runnerId",
+                    "connectors",
+                    "enabled",
+                    "deletedAt"
                   ],
                   "additionalProperties": false
                 }
@@ -1633,9 +1766,7 @@
             }
           }
         ],
-        "tags": [
-          "schedules"
-        ],
+        "tags": ["schedules"],
         "description": "Toggle a schedule's enabled status. When disabling, the remote runner is deleted. When enabling, a new runner is scheduled.",
         "responses": {
           "200": {
@@ -1666,8 +1797,24 @@
                     "runnerId": {
                       "type": "string"
                     },
+                    "connectors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
                     "enabled": {
                       "type": "boolean"
+                    },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -1678,7 +1825,9 @@
                     "instructions",
                     "cron",
                     "runnerId",
-                    "enabled"
+                    "connectors",
+                    "enabled",
+                    "deletedAt"
                   ],
                   "additionalProperties": false
                 }
@@ -1726,26 +1875,19 @@
             }
           }
         ],
-        "tags": [
-          "schedules"
-        ],
+        "tags": ["schedules"],
         "description": "Test run a schedule",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "required": [
-                  "source"
-                ],
+                "required": ["source"],
                 "type": "object",
                 "properties": {
                   "source": {
                     "type": "string",
-                    "enum": [
-                      "user",
-                      "system"
-                    ],
+                    "enum": ["user", "system"],
                     "default": "system"
                   }
                 }
@@ -1768,10 +1910,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "result",
-                    "title"
-                  ],
+                  "required": ["result", "title"],
                   "additionalProperties": false
                 }
               }
@@ -1818,9 +1957,7 @@
             }
           }
         ],
-        "tags": [
-          "schedules"
-        ],
+        "tags": ["schedules"],
         "description": "Resume a schedule: sets enabled=true and creates a new remote runner schedule.",
         "responses": {
           "200": {
@@ -1851,8 +1988,24 @@
                     "runnerId": {
                       "type": "string"
                     },
+                    "connectors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
                     "enabled": {
                       "type": "boolean"
+                    },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -1863,7 +2016,9 @@
                     "instructions",
                     "cron",
                     "runnerId",
-                    "enabled"
+                    "connectors",
+                    "enabled",
+                    "deletedAt"
                   ],
                   "additionalProperties": false
                 }
@@ -1901,9 +2056,7 @@
       "get": {
         "operationId": "tasksList",
         "parameters": [],
-        "tags": [
-          "tasks"
-        ],
+        "tags": ["tasks"],
         "responses": {
           "200": {
             "description": "Response for 200",
@@ -1921,10 +2074,7 @@
                         "type": "string"
                       }
                     },
-                    "required": [
-                      "id",
-                      "title"
-                    ],
+                    "required": ["id", "title"],
                     "additionalProperties": false
                   }
                 }
@@ -1960,18 +2110,14 @@
       "post": {
         "operationId": "createTaskList",
         "parameters": [],
-        "tags": [
-          "tasks"
-        ],
+        "tags": ["tasks"],
         "description": "Create a new task list for the authenticated user.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "required": [
-                  "title"
-                ],
+                "required": ["title"],
                 "type": "object",
                 "properties": {
                   "title": {
@@ -2004,12 +2150,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "id",
-                    "userId",
-                    "title",
-                    "updatedAt"
-                  ],
+                  "required": ["id", "userId", "title", "updatedAt"],
                   "additionalProperties": false
                 }
               }
@@ -2055,9 +2196,7 @@
             }
           }
         ],
-        "tags": [
-          "tasks"
-        ],
+        "tags": ["tasks"],
         "responses": {
           "200": {
             "description": "Response for 200",
@@ -2087,6 +2226,16 @@
                                 "updatedAt": {
                                   "type": "string"
                                 },
+                                "deletedAt": {
+                                  "anyOf": [
+                                    {
+                                      "type": "null"
+                                    },
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
                                 "notes": {
                                   "anyOf": [
                                     {
@@ -2098,16 +2247,6 @@
                                   ]
                                 },
                                 "due": {
-                                  "anyOf": [
-                                    {
-                                      "type": "null"
-                                    },
-                                    {
-                                      "type": "string"
-                                    }
-                                  ]
-                                },
-                                "deletedAt": {
                                   "anyOf": [
                                     {
                                       "type": "null"
@@ -2136,9 +2275,9 @@
                                 "id",
                                 "title",
                                 "updatedAt",
+                                "deletedAt",
                                 "notes",
                                 "due",
-                                "deletedAt",
                                 "taskId",
                                 "mediaId"
                               ],
@@ -2146,9 +2285,7 @@
                             }
                           }
                         },
-                        "required": [
-                          "subtasks"
-                        ],
+                        "required": ["subtasks"],
                         "additionalProperties": false
                       },
                       {
@@ -2165,6 +2302,16 @@
                           },
                           "updatedAt": {
                             "type": "string"
+                          },
+                          "deletedAt": {
+                            "anyOf": [
+                              {
+                                "type": "null"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
                           },
                           "notes": {
                             "anyOf": [
@@ -2188,16 +2335,6 @@
                           },
                           "taskListId": {
                             "type": "string"
-                          },
-                          "deletedAt": {
-                            "anyOf": [
-                              {
-                                "type": "null"
-                              },
-                              {
-                                "type": "string"
-                              }
-                            ]
                           }
                         },
                         "required": [
@@ -2205,10 +2342,10 @@
                           "id",
                           "title",
                           "updatedAt",
+                          "deletedAt",
                           "notes",
                           "due",
-                          "taskListId",
-                          "deletedAt"
+                          "taskListId"
                         ],
                         "additionalProperties": false
                       }
@@ -2256,18 +2393,14 @@
             }
           }
         ],
-        "tags": [
-          "tasks"
-        ],
+        "tags": ["tasks"],
         "description": "Create a new task within a given task list owned by the authenticated user.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "required": [
-                  "title"
-                ],
+                "required": ["title"],
                 "type": "object",
                 "properties": {
                   "title": {
@@ -2313,6 +2446,16 @@
                               "updatedAt": {
                                 "type": "string"
                               },
+                              "deletedAt": {
+                                "anyOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              },
                               "notes": {
                                 "anyOf": [
                                   {
@@ -2324,16 +2467,6 @@
                                 ]
                               },
                               "due": {
-                                "anyOf": [
-                                  {
-                                    "type": "null"
-                                  },
-                                  {
-                                    "type": "string"
-                                  }
-                                ]
-                              },
-                              "deletedAt": {
                                 "anyOf": [
                                   {
                                     "type": "null"
@@ -2362,9 +2495,9 @@
                               "id",
                               "title",
                               "updatedAt",
+                              "deletedAt",
                               "notes",
                               "due",
-                              "deletedAt",
                               "taskId",
                               "mediaId"
                             ],
@@ -2372,9 +2505,7 @@
                           }
                         }
                       },
-                      "required": [
-                        "subtasks"
-                      ],
+                      "required": ["subtasks"],
                       "additionalProperties": false
                     },
                     {
@@ -2391,6 +2522,16 @@
                         },
                         "updatedAt": {
                           "type": "string"
+                        },
+                        "deletedAt": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
                         },
                         "notes": {
                           "anyOf": [
@@ -2414,16 +2555,6 @@
                         },
                         "taskListId": {
                           "type": "string"
-                        },
-                        "deletedAt": {
-                          "anyOf": [
-                            {
-                              "type": "null"
-                            },
-                            {
-                              "type": "string"
-                            }
-                          ]
                         }
                       },
                       "required": [
@@ -2431,10 +2562,10 @@
                         "id",
                         "title",
                         "updatedAt",
+                        "deletedAt",
                         "notes",
                         "due",
-                        "taskListId",
-                        "deletedAt"
+                        "taskListId"
                       ],
                       "additionalProperties": false
                     }
@@ -2474,9 +2605,7 @@
       "get": {
         "operationId": "tasksTree",
         "parameters": [],
-        "tags": [
-          "tasks"
-        ],
+        "tags": ["tasks"],
         "description": "Return all task lists with their active tasks and subtasks for the authenticated user.",
         "responses": {
           "200": {
@@ -2514,6 +2643,16 @@
                                           "updatedAt": {
                                             "type": "string"
                                           },
+                                          "deletedAt": {
+                                            "anyOf": [
+                                              {
+                                                "type": "null"
+                                              },
+                                              {
+                                                "type": "string"
+                                              }
+                                            ]
+                                          },
                                           "notes": {
                                             "anyOf": [
                                               {
@@ -2525,16 +2664,6 @@
                                             ]
                                           },
                                           "due": {
-                                            "anyOf": [
-                                              {
-                                                "type": "null"
-                                              },
-                                              {
-                                                "type": "string"
-                                              }
-                                            ]
-                                          },
-                                          "deletedAt": {
                                             "anyOf": [
                                               {
                                                 "type": "null"
@@ -2563,9 +2692,9 @@
                                           "id",
                                           "title",
                                           "updatedAt",
+                                          "deletedAt",
                                           "notes",
                                           "due",
-                                          "deletedAt",
                                           "taskId",
                                           "mediaId"
                                         ],
@@ -2573,9 +2702,7 @@
                                       }
                                     }
                                   },
-                                  "required": [
-                                    "subtasks"
-                                  ],
+                                  "required": ["subtasks"],
                                   "additionalProperties": false
                                 },
                                 {
@@ -2592,6 +2719,16 @@
                                     },
                                     "updatedAt": {
                                       "type": "string"
+                                    },
+                                    "deletedAt": {
+                                      "anyOf": [
+                                        {
+                                          "type": "null"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
                                     },
                                     "notes": {
                                       "anyOf": [
@@ -2615,16 +2752,6 @@
                                     },
                                     "taskListId": {
                                       "type": "string"
-                                    },
-                                    "deletedAt": {
-                                      "anyOf": [
-                                        {
-                                          "type": "null"
-                                        },
-                                        {
-                                          "type": "string"
-                                        }
-                                      ]
                                     }
                                   },
                                   "required": [
@@ -2632,10 +2759,10 @@
                                     "id",
                                     "title",
                                     "updatedAt",
+                                    "deletedAt",
                                     "notes",
                                     "due",
-                                    "taskListId",
-                                    "deletedAt"
+                                    "taskListId"
                                   ],
                                   "additionalProperties": false
                                 }
@@ -2643,9 +2770,7 @@
                             }
                           }
                         },
-                        "required": [
-                          "tasks"
-                        ],
+                        "required": ["tasks"],
                         "additionalProperties": false
                       },
                       {
@@ -2664,12 +2789,7 @@
                             "type": "string"
                           }
                         },
-                        "required": [
-                          "id",
-                          "userId",
-                          "title",
-                          "updatedAt"
-                        ],
+                        "required": ["id", "userId", "title", "updatedAt"],
                         "additionalProperties": false
                       }
                     ]
@@ -2718,18 +2838,14 @@
             }
           }
         ],
-        "tags": [
-          "tasks"
-        ],
+        "tags": ["tasks"],
         "description": "Create a new subtask under a task owned by the authenticated user.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "required": [
-                  "title"
-                ],
+                "required": ["title"],
                 "type": "object",
                 "properties": {
                   "title": {
@@ -2768,6 +2884,16 @@
                     "updatedAt": {
                       "type": "string"
                     },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    },
                     "notes": {
                       "anyOf": [
                         {
@@ -2779,16 +2905,6 @@
                       ]
                     },
                     "due": {
-                      "anyOf": [
-                        {
-                          "type": "null"
-                        },
-                        {
-                          "type": "string"
-                        }
-                      ]
-                    },
-                    "deletedAt": {
                       "anyOf": [
                         {
                           "type": "null"
@@ -2817,9 +2933,9 @@
                     "id",
                     "title",
                     "updatedAt",
+                    "deletedAt",
                     "notes",
                     "due",
-                    "deletedAt",
                     "taskId",
                     "mediaId"
                   ],
@@ -2868,9 +2984,7 @@
             }
           }
         ],
-        "tags": [
-          "tasks"
-        ],
+        "tags": ["tasks"],
         "description": "Mark a task as completed. Requires the task to belong to the authenticated user.",
         "responses": {
           "200": {
@@ -2899,6 +3013,16 @@
                               "updatedAt": {
                                 "type": "string"
                               },
+                              "deletedAt": {
+                                "anyOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              },
                               "notes": {
                                 "anyOf": [
                                   {
@@ -2910,16 +3034,6 @@
                                 ]
                               },
                               "due": {
-                                "anyOf": [
-                                  {
-                                    "type": "null"
-                                  },
-                                  {
-                                    "type": "string"
-                                  }
-                                ]
-                              },
-                              "deletedAt": {
                                 "anyOf": [
                                   {
                                     "type": "null"
@@ -2948,9 +3062,9 @@
                               "id",
                               "title",
                               "updatedAt",
+                              "deletedAt",
                               "notes",
                               "due",
-                              "deletedAt",
                               "taskId",
                               "mediaId"
                             ],
@@ -2958,9 +3072,7 @@
                           }
                         }
                       },
-                      "required": [
-                        "subtasks"
-                      ],
+                      "required": ["subtasks"],
                       "additionalProperties": false
                     },
                     {
@@ -2977,6 +3089,16 @@
                         },
                         "updatedAt": {
                           "type": "string"
+                        },
+                        "deletedAt": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
                         },
                         "notes": {
                           "anyOf": [
@@ -3000,16 +3122,6 @@
                         },
                         "taskListId": {
                           "type": "string"
-                        },
-                        "deletedAt": {
-                          "anyOf": [
-                            {
-                              "type": "null"
-                            },
-                            {
-                              "type": "string"
-                            }
-                          ]
                         }
                       },
                       "required": [
@@ -3017,10 +3129,10 @@
                         "id",
                         "title",
                         "updatedAt",
+                        "deletedAt",
                         "notes",
                         "due",
-                        "taskListId",
-                        "deletedAt"
+                        "taskListId"
                       ],
                       "additionalProperties": false
                     }
@@ -3069,9 +3181,7 @@
             }
           }
         ],
-        "tags": [
-          "tasks"
-        ],
+        "tags": ["tasks"],
         "description": "Mark a subtask as completed. Requires the subtask to belong to the authenticated user.",
         "responses": {
           "200": {
@@ -3093,6 +3203,16 @@
                     "updatedAt": {
                       "type": "string"
                     },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    },
                     "notes": {
                       "anyOf": [
                         {
@@ -3104,16 +3224,6 @@
                       ]
                     },
                     "due": {
-                      "anyOf": [
-                        {
-                          "type": "null"
-                        },
-                        {
-                          "type": "string"
-                        }
-                      ]
-                    },
-                    "deletedAt": {
                       "anyOf": [
                         {
                           "type": "null"
@@ -3142,9 +3252,9 @@
                     "id",
                     "title",
                     "updatedAt",
+                    "deletedAt",
                     "notes",
                     "due",
-                    "deletedAt",
                     "taskId",
                     "mediaId"
                   ],
@@ -3193,9 +3303,7 @@
             }
           }
         ],
-        "tags": [
-          "tasks"
-        ],
+        "tags": ["tasks"],
         "description": "Mark a task as needsAction (uncomplete). Requires the task to belong to the authenticated user.",
         "responses": {
           "200": {
@@ -3224,6 +3332,16 @@
                               "updatedAt": {
                                 "type": "string"
                               },
+                              "deletedAt": {
+                                "anyOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              },
                               "notes": {
                                 "anyOf": [
                                   {
@@ -3235,16 +3353,6 @@
                                 ]
                               },
                               "due": {
-                                "anyOf": [
-                                  {
-                                    "type": "null"
-                                  },
-                                  {
-                                    "type": "string"
-                                  }
-                                ]
-                              },
-                              "deletedAt": {
                                 "anyOf": [
                                   {
                                     "type": "null"
@@ -3273,9 +3381,9 @@
                               "id",
                               "title",
                               "updatedAt",
+                              "deletedAt",
                               "notes",
                               "due",
-                              "deletedAt",
                               "taskId",
                               "mediaId"
                             ],
@@ -3283,9 +3391,7 @@
                           }
                         }
                       },
-                      "required": [
-                        "subtasks"
-                      ],
+                      "required": ["subtasks"],
                       "additionalProperties": false
                     },
                     {
@@ -3302,6 +3408,16 @@
                         },
                         "updatedAt": {
                           "type": "string"
+                        },
+                        "deletedAt": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
                         },
                         "notes": {
                           "anyOf": [
@@ -3325,16 +3441,6 @@
                         },
                         "taskListId": {
                           "type": "string"
-                        },
-                        "deletedAt": {
-                          "anyOf": [
-                            {
-                              "type": "null"
-                            },
-                            {
-                              "type": "string"
-                            }
-                          ]
                         }
                       },
                       "required": [
@@ -3342,10 +3448,10 @@
                         "id",
                         "title",
                         "updatedAt",
+                        "deletedAt",
                         "notes",
                         "due",
-                        "taskListId",
-                        "deletedAt"
+                        "taskListId"
                       ],
                       "additionalProperties": false
                     }
@@ -3394,9 +3500,7 @@
             }
           }
         ],
-        "tags": [
-          "tasks"
-        ],
+        "tags": ["tasks"],
         "description": "Mark a subtask as needsAction (uncomplete). Requires the subtask to belong to the authenticated user.",
         "responses": {
           "200": {
@@ -3418,6 +3522,16 @@
                     "updatedAt": {
                       "type": "string"
                     },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    },
                     "notes": {
                       "anyOf": [
                         {
@@ -3429,16 +3543,6 @@
                       ]
                     },
                     "due": {
-                      "anyOf": [
-                        {
-                          "type": "null"
-                        },
-                        {
-                          "type": "string"
-                        }
-                      ]
-                    },
-                    "deletedAt": {
                       "anyOf": [
                         {
                           "type": "null"
@@ -3467,9 +3571,9 @@
                     "id",
                     "title",
                     "updatedAt",
+                    "deletedAt",
                     "notes",
                     "due",
-                    "deletedAt",
                     "taskId",
                     "mediaId"
                   ],
@@ -3518,9 +3622,7 @@
             }
           }
         ],
-        "tags": [
-          "tasks"
-        ],
+        "tags": ["tasks"],
         "description": "Update a task's title and/or notes. Requires the task to belong to the authenticated user.",
         "requestBody": {
           "required": false,
@@ -3568,6 +3670,16 @@
                               "updatedAt": {
                                 "type": "string"
                               },
+                              "deletedAt": {
+                                "anyOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              },
                               "notes": {
                                 "anyOf": [
                                   {
@@ -3579,16 +3691,6 @@
                                 ]
                               },
                               "due": {
-                                "anyOf": [
-                                  {
-                                    "type": "null"
-                                  },
-                                  {
-                                    "type": "string"
-                                  }
-                                ]
-                              },
-                              "deletedAt": {
                                 "anyOf": [
                                   {
                                     "type": "null"
@@ -3617,9 +3719,9 @@
                               "id",
                               "title",
                               "updatedAt",
+                              "deletedAt",
                               "notes",
                               "due",
-                              "deletedAt",
                               "taskId",
                               "mediaId"
                             ],
@@ -3627,9 +3729,7 @@
                           }
                         }
                       },
-                      "required": [
-                        "subtasks"
-                      ],
+                      "required": ["subtasks"],
                       "additionalProperties": false
                     },
                     {
@@ -3646,6 +3746,16 @@
                         },
                         "updatedAt": {
                           "type": "string"
+                        },
+                        "deletedAt": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
                         },
                         "notes": {
                           "anyOf": [
@@ -3669,16 +3779,6 @@
                         },
                         "taskListId": {
                           "type": "string"
-                        },
-                        "deletedAt": {
-                          "anyOf": [
-                            {
-                              "type": "null"
-                            },
-                            {
-                              "type": "string"
-                            }
-                          ]
                         }
                       },
                       "required": [
@@ -3686,10 +3786,10 @@
                         "id",
                         "title",
                         "updatedAt",
+                        "deletedAt",
                         "notes",
                         "due",
-                        "taskListId",
-                        "deletedAt"
+                        "taskListId"
                       ],
                       "additionalProperties": false
                     }
@@ -3738,9 +3838,7 @@
             }
           }
         ],
-        "tags": [
-          "tasks"
-        ],
+        "tags": ["tasks"],
         "description": "Update a subtask's title and/or notes. Requires the subtask to belong to the authenticated user.",
         "requestBody": {
           "required": false,
@@ -3781,6 +3879,16 @@
                     "updatedAt": {
                       "type": "string"
                     },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    },
                     "notes": {
                       "anyOf": [
                         {
@@ -3792,16 +3900,6 @@
                       ]
                     },
                     "due": {
-                      "anyOf": [
-                        {
-                          "type": "null"
-                        },
-                        {
-                          "type": "string"
-                        }
-                      ]
-                    },
-                    "deletedAt": {
                       "anyOf": [
                         {
                           "type": "null"
@@ -3830,9 +3928,9 @@
                     "id",
                     "title",
                     "updatedAt",
+                    "deletedAt",
                     "notes",
                     "due",
-                    "deletedAt",
                     "taskId",
                     "mediaId"
                   ],
@@ -3872,9 +3970,7 @@
       "post": {
         "operationId": "syncTasks",
         "parameters": [],
-        "tags": [
-          "tasks"
-        ],
+        "tags": ["tasks"],
         "description": "Sync Google Tasks into our TasksList/Task/Subtask models for the authenticated user.",
         "responses": {
           "200": {
@@ -3885,9 +3981,7 @@
                   "type": "object",
                   "properties": {
                     "status": {
-                      "enum": [
-                        "ok"
-                      ],
+                      "enum": ["ok"],
                       "type": "string"
                     },
                     "taskListsProcessed": {
@@ -3961,9 +4055,7 @@
             }
           }
         ],
-        "tags": [
-          "timesheet"
-        ],
+        "tags": ["timesheet"],
         "description": "Return hour entries grouped by client and month. Date range can be restricted via optional since/until.",
         "responses": {
           "200": {
@@ -3985,10 +4077,7 @@
                             "type": "string"
                           }
                         },
-                        "required": [
-                          "id",
-                          "name"
-                        ],
+                        "required": ["id", "name"],
                         "additionalProperties": false
                       },
                       "months": {
@@ -4052,10 +4141,7 @@
                                         "type": "string"
                                       }
                                     },
-                                    "required": [
-                                      "id",
-                                      "name"
-                                    ],
+                                    "required": ["id", "name"],
                                     "additionalProperties": false
                                   },
                                   "updatedAt": {
@@ -4077,19 +4163,12 @@
                               }
                             }
                           },
-                          "required": [
-                            "key",
-                            "label",
-                            "entries"
-                          ],
+                          "required": ["key", "label", "entries"],
                           "additionalProperties": false
                         }
                       }
                     },
-                    "required": [
-                      "client",
-                      "months"
-                    ],
+                    "required": ["client", "months"],
                     "additionalProperties": false
                   }
                 }
@@ -4127,19 +4206,14 @@
       "post": {
         "operationId": "getSignedUrl",
         "parameters": [],
-        "tags": [
-          "files"
-        ],
+        "tags": ["files"],
         "description": "Generate a signed URL for uploading files to cloud storage. Creates a file record and returns a time-limited upload URL. Supports PDF, PNG, JPG, and DICOM file types.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "required": [
-                  "name",
-                  "type"
-                ],
+                "required": ["name", "type"],
                 "type": "object",
                 "properties": {
                   "name": {
@@ -4184,41 +4258,29 @@
                         "Content-Type": {
                           "anyOf": [
                             {
-                              "enum": [
-                                "application/pdf"
-                              ],
+                              "enum": ["application/pdf"],
                               "type": "string"
                             },
                             {
-                              "enum": [
-                                "image/png"
-                              ],
+                              "enum": ["image/png"],
                               "type": "string"
                             },
                             {
-                              "enum": [
-                                "image/jpeg"
-                              ],
+                              "enum": ["image/jpeg"],
                               "type": "string"
                             },
                             {
-                              "enum": [
-                                "image/jpg"
-                              ],
+                              "enum": ["image/jpg"],
                               "type": "string"
                             },
                             {
-                              "enum": [
-                                "application/dicom"
-                              ],
+                              "enum": ["application/dicom"],
                               "type": "string"
                             }
                           ]
                         },
                         "x-goog-if-generation-match": {
-                          "enum": [
-                            "0"
-                          ],
+                          "enum": ["0"],
                           "type": "string"
                         },
                         "x-goog-meta-file-id": {
@@ -4233,11 +4295,7 @@
                       "additionalProperties": false
                     }
                   },
-                  "required": [
-                    "signedUrl",
-                    "fileId",
-                    "requiredHeaders"
-                  ],
+                  "required": ["signedUrl", "fileId", "requiredHeaders"],
                   "additionalProperties": false
                 }
               }
@@ -4283,9 +4341,7 @@
             }
           }
         ],
-        "tags": [
-          "files"
-        ],
+        "tags": ["files"],
         "description": "Get a list of files uploaded by a specific user, ordered by creation date. Returns file metadata including name, path, content type, and size.",
         "responses": {
           "200": {
@@ -4342,9 +4398,7 @@
                       }
                     }
                   },
-                  "required": [
-                    "records"
-                  ],
+                  "required": ["records"],
                   "additionalProperties": false
                 }
               }
@@ -4391,9 +4445,7 @@
             }
           }
         ],
-        "tags": [
-          "files"
-        ],
+        "tags": ["files"],
         "description": "Get detailed information about a specific file by its ID. Returns complete file metadata and properties.",
         "responses": {
           "200": {
@@ -4487,9 +4539,7 @@
             }
           }
         ],
-        "tags": [
-          "files"
-        ],
+        "tags": ["files"],
         "description": "Generate a short-lived signed URL for reading a file by its ID. Ensures the file belongs to the authenticated user.",
         "responses": {
           "200": {
@@ -4506,10 +4556,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "signedUrl",
-                    "expiresAt"
-                  ],
+                  "required": ["signedUrl", "expiresAt"],
                   "additionalProperties": false
                 }
               }
@@ -4547,17 +4594,12 @@
     "schemas": {
       "UnauthorizedErr": {
         "type": "object",
-        "required": [
-          "type",
-          "title"
-        ],
+        "required": ["type", "title"],
         "additionalProperties": false,
         "properties": {
           "error": {
             "type": "string",
-            "enum": [
-              "Unauthorized"
-            ]
+            "enum": ["Unauthorized"]
           }
         }
       },

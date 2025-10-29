@@ -16,7 +16,9 @@ export type GetScheduleById = {
   instructions: string;
   cron: string;
   runnerId: string;
+  connectors: string[];
   enabled: boolean;
+  deletedAt: string;
 };
 
 export type GetScheduleById400 = models.ValidationError;

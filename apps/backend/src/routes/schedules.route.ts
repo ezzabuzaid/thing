@@ -1,5 +1,4 @@
-import { groq } from '@ai-sdk/groq';
-import { agent, generate, user } from '@deepagents/agent';
+import { generate, user } from '@deepagents/agent';
 import { type Schedules, prisma } from '@thing/db';
 import { Client } from '@upstash/qstash';
 import { Hono } from 'hono';
@@ -7,6 +6,8 @@ import { Resend } from 'resend';
 import * as uuid from 'uuid';
 import { z } from 'zod';
 
+import { hackerNewsConnector } from '../faye/connectors/hackernews.ts';
+import { titleGeneratorAgent } from '../faye/v2.ts';
 import { authenticate } from '../middlewares/middleware.ts';
 import { validate } from '../middlewares/validator.ts';
 
@@ -55,9 +56,16 @@ export default async function (router: Hono) {
         select: payload.body.enabled,
         against: z.boolean().optional(),
       },
+      connectors: {
+        select: payload.body.connectors,
+        against: z
+          .array(z.enum(['reddit', 'web search', 'hackernews']))
+          .max(3)
+          .optional(),
+      },
     })),
     async (c) => {
-      const { title, instructions, cron, enabled } = c.var.input;
+      const { title, instructions, cron, enabled, connectors } = c.var.input;
 
       const schedule = await prisma.$transaction(async (tx) => {
         const id = uuid.v7();
@@ -74,6 +82,7 @@ export default async function (router: Hono) {
             cron,
             enabled: enabled ?? true,
             runnerId,
+            connectors: connectors ? Array.from(new Set(connectors)) : [],
           },
         });
         return record;
@@ -103,7 +112,7 @@ export default async function (router: Hono) {
     })),
     async (c) => {
       const { page, pageSize } = c.var.input;
-      const where = { userId: c.var.subject.id } as const;
+      const where = { userId: c.var.subject.id, deletedAt: null };
 
       const totalCount = await prisma.schedules.count({ where });
       const schedules = await prisma.schedules.findMany({
@@ -141,7 +150,7 @@ export default async function (router: Hono) {
     async (c) => {
       const { id } = c.var.input;
       const schedule = await prisma.schedules.findFirstOrThrow({
-        where: { id, userId: c.var.subject.id },
+        where: { id, userId: c.var.subject.id, deletedAt: null },
         include: { runs: true },
       });
       return c.json(schedule);
@@ -170,9 +179,17 @@ export default async function (router: Hono) {
         select: payload.body.cron,
         against: z.string().min(1).optional(),
       },
+      connectors: {
+        select: payload.body.connectors,
+        against: z
+          .array(z.enum(['reddit', 'web search', 'hackernews']))
+          .max(3)
+          .optional()
+          .default([]),
+      },
     })),
     async (c) => {
-      const { id, title, instructions, cron } = c.var.input;
+      const { id, title, instructions, cron, connectors } = c.var.input;
 
       // Ensure user owns the schedule
       const existing = await prisma.schedules.findFirstOrThrow({
@@ -198,6 +215,9 @@ export default async function (router: Hono) {
             data: {
               ...(title !== undefined && { title }),
               ...(instructions !== undefined && { instructions }),
+              ...(connectors !== undefined && {
+                connectors: Array.from(new Set(connectors)),
+              }),
               cron,
               runnerId: newRunnerId,
             },
@@ -213,6 +233,9 @@ export default async function (router: Hono) {
         data: {
           ...(title !== undefined && { title }),
           ...(instructions !== undefined && { instructions }),
+          ...(connectors !== undefined && {
+            connectors: Array.from(new Set(connectors)),
+          }),
         },
       });
 
@@ -349,21 +372,53 @@ export default async function (router: Hono) {
       return c.json(rec);
     },
   );
+
+  /**
+   * @openapi archiveSchedule
+   * @tags schedules
+   * @description Archive a schedule: disables it, removes remote runner, and soft deletes it.
+   */
+  router.delete(
+    '/schedules/:id',
+    authenticate(),
+    validate((payload) => ({
+      id: {
+        select: payload.params.id,
+        against: z.string().uuid(),
+      },
+    })),
+    async (c) => {
+      const { id } = c.var.input;
+
+      // Ensure schedule exists and belongs to the user
+      const existing = await prisma.schedules.findFirstOrThrow({
+        where: { id, userId: c.var.subject.id, deletedAt: null },
+      });
+
+      // Delete remote runner if schedule is enabled
+      if (existing.enabled) {
+        await client.schedules.delete(existing.runnerId).catch(() => {
+          // Ignore errors if schedule doesn't exist
+        });
+      }
+
+      // Archive: disable and soft delete
+      const record = await prisma.schedules.update({
+        where: { id },
+        data: {
+          enabled: false,
+          deletedAt: new Date(),
+        },
+      });
+
+      return c.json(record);
+    },
+  );
 }
 
-const runnerAgent = agent({
-  name: 'ScheduleRunner',
-  model: groq('openai/gpt-oss-20b'),
-  prompt: '',
-});
-const titleGeneratorAgent = agent({
-  name: 'ScheduleTitleGenerator',
-  model: groq('openai/gpt-oss-20b'),
-  prompt: '',
-});
 async function runSchedule(schedule: Schedules) {
   const { text: result } = await generate(
-    runnerAgent,
+    hackerNewsConnector,
     [user(schedule.instructions)],
     {},
   );

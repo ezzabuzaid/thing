@@ -8,7 +8,9 @@ export type CreateSchedule201 = {
   instructions: string;
   cron: string;
   runnerId: string;
+  connectors: string[];
   enabled: boolean;
+  deletedAt: string;
 };
 
 export type CreateSchedule400 = models.ValidationError;

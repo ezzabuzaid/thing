@@ -6,9 +6,9 @@ export type UncompleteTask = {
     id: string;
     title: string;
     updatedAt: string;
+    deletedAt: string;
     notes: string;
     due: string;
-    deletedAt: string;
     taskId: string;
     mediaId: string;
   }[];
@@ -16,10 +16,10 @@ export type UncompleteTask = {
   id: string;
   title: string;
   updatedAt: string;
+  deletedAt: string;
   notes: string;
   due: string;
   taskListId: string;
-  deletedAt: string;
 };
 
 export type UncompleteTask400 = models.ValidationError;

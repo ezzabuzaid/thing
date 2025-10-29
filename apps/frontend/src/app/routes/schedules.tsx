@@ -34,6 +34,7 @@ import {
   startOfWeek,
 } from 'date-fns';
 import {
+  Archive,
   ChevronLeft,
   ChevronRight,
   Pause,
@@ -44,7 +45,9 @@ import {
   X,
 } from 'lucide-react';
 import React from 'react';
+import { useSearchParams } from 'react-router';
 
+import SelectorChips from '../components/ChipSelector.tsx';
 import { Title } from '../components/Title.tsx';
 import { Message, MessageContent } from '../elements/Message.tsx';
 import { Response } from '../elements/Response.tsx';
@@ -54,6 +57,16 @@ import {
   formatRelativeTime,
   formatShortDate,
 } from '../logic/time.ts';
+
+const CONNECTOR_OPTIONS: string[] = [
+  'web search',
+  'hackernews',
+  'reddit',
+  'twitter',
+  'github',
+  'gmail',
+  'notion',
+];
 
 function PauseButton({
   id,
@@ -131,37 +144,23 @@ function ResumeButton({
 
 export default function Schedules() {
   const { data, isLoading } = useData('GET /schedules');
-  const [searchParams, setSearchParams] = React.useState(
-    new URLSearchParams(
-      typeof window !== 'undefined' ? window.location.search : '',
-    ),
-  );
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const selectedId = searchParams.get('id') ?? null;
 
-  React.useEffect(() => {
-    const handler = () =>
-      setSearchParams(new URLSearchParams(window.location.search));
-    window.addEventListener('popstate', handler);
-    return () => window.removeEventListener('popstate', handler);
-  }, []);
+  // React.useEffect(() => {
+  //   const handler = () =>
+  //     setSearchParams(new URLSearchParams(window.location.search));
+  //   window.addEventListener('popstate', handler);
+  //   return () => window.removeEventListener('popstate', handler);
+  // }, []);
 
   const handleSelect = (id: string) => {
-    const next = new URLSearchParams(window.location.search);
-    next.set('id', id);
-    const url = `${window.location.pathname}?${next.toString()}`;
-    window.history.pushState({}, '', url);
-    setSearchParams(next);
-  };
-
-  const handleClose = () => {
-    const next = new URLSearchParams(window.location.search);
-    next.delete('id');
-    const url = next.toString()
-      ? `${window.location.pathname}?${next.toString()}`
-      : window.location.pathname;
-    window.history.pushState({}, '', url);
-    setSearchParams(next);
+    // const next = new URLSearchParams(window.location.search);
+    // next.set('id', id);
+    // const url = `${window.location.pathname}?${next.toString()}`;
+    // window.history.pushState({}, '', url);
+    setSearchParams({ id });
   };
 
   return (
@@ -180,7 +179,7 @@ export default function Schedules() {
             />
           </div>
           <div className="overflow-hidden rounded-lg border">
-            <DetailsPane selectedId={selectedId} onClose={handleClose} />
+            <DetailsPane selectedId={selectedId} />
           </div>
         </div>
       </div>
@@ -302,13 +301,7 @@ function ListPane({
   );
 }
 
-function DetailsPane({
-  selectedId,
-  onClose,
-}: {
-  selectedId: string | null;
-  onClose: () => void;
-}) {
+function DetailsPane({ selectedId }: { selectedId: string | null }) {
   if (!selectedId) {
     return (
       <div className="text-muted-foreground flex h-full items-center justify-center p-6 text-sm">
@@ -317,10 +310,10 @@ function DetailsPane({
     );
   }
 
-  return <ScheduleDetails id={selectedId} onClose={onClose} />;
+  return <ScheduleDetails id={selectedId} />;
 }
 
-function ScheduleDetails({ id, onClose }: { id: string; onClose: () => void }) {
+function ScheduleDetails({ id }: { id: string }) {
   const { data, isLoading } = useData('GET /schedules/{id}', { id });
 
   if (isLoading) {
@@ -343,7 +336,7 @@ function ScheduleDetails({ id, onClose }: { id: string; onClose: () => void }) {
 
   return (
     <div className="flex h-full flex-col">
-      <Header schedule={data} onClose={onClose} />
+      <Header schedule={data} />
       <Separator />
       <div className="flex-1 overflow-auto p-4">
         <RunsList
@@ -356,31 +349,59 @@ function ScheduleDetails({ id, onClose }: { id: string; onClose: () => void }) {
   );
 }
 
-const Header = ({
-  schedule,
-  onClose,
-}: {
-  schedule: GetScheduleById;
-  onClose: () => void;
-}) => {
+const Header = ({ schedule }: { schedule: GetScheduleById }) => {
   const runAction = useAction('POST /schedules/{id}/run', {
     invalidate: ['GET /schedules/{id}'],
   });
+  const archiveAction = useAction('DELETE /schedules/{id}', {
+    invalidate: ['GET /schedules', 'GET /schedules/{id}'],
+    onSuccess: () => {
+      setSearchParams((it) => {
+        it.delete('id');
+        return it;
+      });
+    },
+  });
+  const [, setSearchParams] = useSearchParams();
 
   return (
     <div className="flex flex-col gap-3 p-4">
       <div className="flex items-center justify-between">
         <span className="text-lg font-semibold">{schedule.title}</span>
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          onClick={onClose}
-          aria-label="Close schedule details"
-          title="Close"
-        >
-          <X className="size-4" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            aria-label="Archive schedule"
+            title="Archive"
+            disabled={archiveAction.isPending}
+            onClick={() => {
+              archiveAction.mutate({ id: schedule.id });
+            }}
+          >
+            {archiveAction.isPending ? (
+              <Spinner className="size-4" />
+            ) : (
+              <Archive className="size-4" />
+            )}
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            onClick={() => {
+              setSearchParams((it) => {
+                it.delete('id');
+                return it;
+              });
+            }}
+            aria-label="Close schedule details"
+            title="Close"
+          >
+            <X className="size-4" />
+          </Button>
+        </div>
       </div>
       <div className="flex items-center gap-2">
         <span className="flex items-center gap-2 text-sm">
@@ -442,6 +463,7 @@ function CreateScheduleForm({
   const [cron, setCron] = React.useState('');
   const [instructions, setInstructions] = React.useState('');
   const [enabled, setEnabled] = React.useState(true);
+  const [connectors, setConnectors] = React.useState<string[]>([]);
   const [error, setError] = React.useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -457,6 +479,7 @@ function CreateScheduleForm({
         cron: cron.trim(),
         instructions: instructions.trim(),
         enabled,
+        connectors,
       },
       {
         onSuccess: (created) => {
@@ -486,6 +509,15 @@ function CreateScheduleForm({
         value={instructions}
         onChange={setInstructions}
       />
+
+      <div className="grid gap-2">
+        <Label className="text-xs font-medium">Supported connectors</Label>
+        <SelectorChips
+          options={CONNECTOR_OPTIONS}
+          value={connectors}
+          onChange={setConnectors}
+        />
+      </div>
 
       <div className="flex items-center gap-2">
         <Button type="submit" disabled={create.isPending}>
@@ -613,6 +645,9 @@ function EditScheduleForm({
   const [title, setTitle] = React.useState(schedule.title);
   const [cron, setCron] = React.useState(schedule.cron);
   const [instructions, setInstructions] = React.useState(schedule.instructions);
+  const [connectors, setConnectors] = React.useState<string[]>(
+    schedule.connectors ?? [],
+  );
   const [error, setError] = React.useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -628,6 +663,7 @@ function EditScheduleForm({
         title: title.trim(),
         cron: cron.trim(),
         instructions: instructions.trim(),
+        connectors,
       },
       {
         onSuccess: () => {
@@ -657,6 +693,15 @@ function EditScheduleForm({
         value={instructions}
         onChange={setInstructions}
       />
+
+      <div className="grid gap-2">
+        <Label className="text-xs font-medium">Supported connectors</Label>
+        <SelectorChips
+          options={CONNECTOR_OPTIONS}
+          value={connectors}
+          onChange={setConnectors}
+        />
+      </div>
 
       <div className="flex items-center gap-2">
         <Button type="submit" disabled={update.isPending}>

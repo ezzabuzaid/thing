@@ -5,9 +5,9 @@ export type UncompleteSubtask = {
   id: string;
   title: string;
   updatedAt: string;
+  deletedAt: string;
   notes: string;
   due: string;
-  deletedAt: string;
   taskId: string;
   mediaId: string;
 };

@@ -7,9 +7,9 @@ export type TasksTree = {
       id: string;
       title: string;
       updatedAt: string;
+      deletedAt: string;
       notes: string;
       due: string;
-      deletedAt: string;
       taskId: string;
       mediaId: string;
     }[];
@@ -17,10 +17,10 @@ export type TasksTree = {
     id: string;
     title: string;
     updatedAt: string;
+    deletedAt: string;
     notes: string;
     due: string;
     taskListId: string;
-    deletedAt: string;
   }[];
   id: string;
   userId: string;
