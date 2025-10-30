@@ -15,6 +15,7 @@ export * from './get-files.ts';
 export * from './get-schedule-by-id.ts';
 export * from './get-signed-read-url.ts';
 export * from './get-signed-url.ts';
+export * from './list-schedule-connectors.ts';
 export * from './list-schedules.ts';
 export * from './list-thoughts.ts';
 export * from './resume-schedule.ts';

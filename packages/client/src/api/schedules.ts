@@ -8,6 +8,26 @@ import { createBaseUrlInterceptor, createHeadersInterceptor, type Interceptor } 
 import { Dispatcher, fetchType, type InstanceType } from '../http/dispatcher.ts';
 import { Pagination, OffsetPagination, CursorPagination } from "../pagination/index.ts";
 export default {
+"GET /schedules/connectors": {
+          schema: schedules.listScheduleConnectorsSchema,
+          output:[http.Ok<outputs.ListScheduleConnectors>,http.BadRequest<outputs.ListScheduleConnectors400>,http.Unauthorized<outputs.UnauthorizedErr>],
+          toRequest(input: z.input<typeof schedules.listScheduleConnectorsSchema>) {
+           return toRequest('GET /schedules/connectors', empty(input, {
+              inputHeaders: [],
+              inputQuery: [],
+              inputBody: [],
+              inputParams: [],
+            }));},
+         async dispatch(input: z.input<typeof schedules.listScheduleConnectorsSchema>,options: {
+            signal?: AbortSignal;
+            interceptors: Interceptor[];
+            fetch: z.infer<typeof fetchType>;
+          }){
+            const dispatcher = new Dispatcher(options.interceptors, options.fetch);
+            const result = await dispatcher.send(this.toRequest(input), this.output);
+            return result.data;
+            },
+          },
 "POST /schedules": {
           schema: schedules.createScheduleSchema,
           output:[http.Created<outputs.CreateSchedule201>,http.BadRequest<outputs.CreateSchedule400>,http.Unauthorized<outputs.UnauthorizedErr>],

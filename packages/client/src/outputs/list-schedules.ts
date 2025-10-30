@@ -6,10 +6,10 @@ export type ListSchedules = {
     userId: string;
     title: string;
     updatedAt: string;
+    connectors: string[];
     instructions: string;
     cron: string;
     runnerId: string;
-    connectors: string[];
     enabled: boolean;
     deletedAt: string;
   }[];

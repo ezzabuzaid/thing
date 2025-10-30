@@ -6,6 +6,8 @@ export const hackerNewsConnector = agent({
   name: 'hackernews_research_agent',
   model: groq('openai/gpt-oss-20b'),
   temperature: 0,
+  handoffDescription:
+    'Use this agent to perform research tasks using the HackerNews connector, leveraging the HN Algolia API to gather insights, fetch stories, and have complete interaction.',
   prompt: `
     <SystemContext>
       You are a HackerNews research specialist that uses the HN Algolia API to gather insights,

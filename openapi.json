@@ -37,7 +37,7 @@
           {
             "in": "query",
             "name": "page",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "integer",
               "exclusiveMinimum": 0,
@@ -47,7 +47,7 @@
           {
             "in": "query",
             "name": "pageSize",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "integer",
               "minimum": 1,
@@ -819,7 +819,7 @@
           {
             "in": "query",
             "name": "page",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "integer",
               "exclusiveMinimum": 0,
@@ -829,7 +829,7 @@
           {
             "in": "query",
             "name": "pageSize",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "integer",
               "minimum": 1,
@@ -1034,6 +1034,61 @@
         }
       }
     },
+    "/schedules/connectors": {
+      "get": {
+        "operationId": "listScheduleConnectors",
+        "parameters": [],
+        "tags": ["schedules"],
+        "description": "List available connectors for schedules.",
+        "responses": {
+          "200": {
+            "description": "Response for 200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "connectors": {
+                      "type": "array",
+                      "items": {
+                        "enum": ["web search"],
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": ["connectors"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ValidationError"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedErr"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/schedules": {
       "post": {
         "operationId": "createSchedule",
@@ -1066,10 +1121,9 @@
                   "connectors": {
                     "type": "array",
                     "items": {
-                      "type": "string",
-                      "enum": ["reddit", "web search", "hackernews"]
+                      "type": "string"
                     },
-                    "maxItems": 3
+                    "default": []
                   }
                 }
               }
@@ -1096,6 +1150,12 @@
                     "updatedAt": {
                       "type": "string"
                     },
+                    "connectors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
                     "instructions": {
                       "type": "string"
                     },
@@ -1104,12 +1164,6 @@
                     },
                     "runnerId": {
                       "type": "string"
-                    },
-                    "connectors": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
                     },
                     "enabled": {
                       "type": "boolean"
@@ -1130,10 +1184,10 @@
                     "userId",
                     "title",
                     "updatedAt",
+                    "connectors",
                     "instructions",
                     "cron",
                     "runnerId",
-                    "connectors",
                     "enabled",
                     "deletedAt"
                   ],
@@ -1174,7 +1228,7 @@
           {
             "in": "query",
             "name": "page",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "integer",
               "exclusiveMinimum": 0,
@@ -1184,7 +1238,7 @@
           {
             "in": "query",
             "name": "pageSize",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "integer",
               "minimum": 1,
@@ -1220,6 +1274,12 @@
                           "updatedAt": {
                             "type": "string"
                           },
+                          "connectors": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
                           "instructions": {
                             "type": "string"
                           },
@@ -1228,12 +1288,6 @@
                           },
                           "runnerId": {
                             "type": "string"
-                          },
-                          "connectors": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
                           },
                           "enabled": {
                             "type": "boolean"
@@ -1254,10 +1308,10 @@
                           "userId",
                           "title",
                           "updatedAt",
+                          "connectors",
                           "instructions",
                           "cron",
                           "runnerId",
-                          "connectors",
                           "enabled",
                           "deletedAt"
                         ],
@@ -1431,6 +1485,12 @@
                         "updatedAt": {
                           "type": "string"
                         },
+                        "connectors": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
                         "instructions": {
                           "type": "string"
                         },
@@ -1439,12 +1499,6 @@
                         },
                         "runnerId": {
                           "type": "string"
-                        },
-                        "connectors": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
                         },
                         "enabled": {
                           "type": "boolean"
@@ -1465,10 +1519,10 @@
                         "userId",
                         "title",
                         "updatedAt",
+                        "connectors",
                         "instructions",
                         "cron",
                         "runnerId",
-                        "connectors",
                         "enabled",
                         "deletedAt"
                       ],
@@ -1542,10 +1596,9 @@
                   "connectors": {
                     "type": "array",
                     "items": {
-                      "type": "string",
-                      "enum": ["reddit", "web search", "hackernews"]
+                      "type": "string"
                     },
-                    "maxItems": 3
+                    "default": []
                   }
                 }
               }
@@ -1572,6 +1625,12 @@
                     "updatedAt": {
                       "type": "string"
                     },
+                    "connectors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
                     "instructions": {
                       "type": "string"
                     },
@@ -1580,12 +1639,6 @@
                     },
                     "runnerId": {
                       "type": "string"
-                    },
-                    "connectors": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
                     },
                     "enabled": {
                       "type": "boolean"
@@ -1606,10 +1659,10 @@
                     "userId",
                     "title",
                     "updatedAt",
+                    "connectors",
                     "instructions",
                     "cron",
                     "runnerId",
-                    "connectors",
                     "enabled",
                     "deletedAt"
                   ],
@@ -1679,6 +1732,12 @@
                     "updatedAt": {
                       "type": "string"
                     },
+                    "connectors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
                     "instructions": {
                       "type": "string"
                     },
@@ -1687,12 +1746,6 @@
                     },
                     "runnerId": {
                       "type": "string"
-                    },
-                    "connectors": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
                     },
                     "enabled": {
                       "type": "boolean"
@@ -1713,10 +1766,10 @@
                     "userId",
                     "title",
                     "updatedAt",
+                    "connectors",
                     "instructions",
                     "cron",
                     "runnerId",
-                    "connectors",
                     "enabled",
                     "deletedAt"
                   ],
@@ -1788,6 +1841,12 @@
                     "updatedAt": {
                       "type": "string"
                     },
+                    "connectors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
                     "instructions": {
                       "type": "string"
                     },
@@ -1796,12 +1855,6 @@
                     },
                     "runnerId": {
                       "type": "string"
-                    },
-                    "connectors": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
                     },
                     "enabled": {
                       "type": "boolean"
@@ -1822,10 +1875,10 @@
                     "userId",
                     "title",
                     "updatedAt",
+                    "connectors",
                     "instructions",
                     "cron",
                     "runnerId",
-                    "connectors",
                     "enabled",
                     "deletedAt"
                   ],
@@ -1878,11 +1931,10 @@
         "tags": ["schedules"],
         "description": "Test run a schedule",
         "requestBody": {
-          "required": true,
+          "required": false,
           "content": {
             "application/json": {
               "schema": {
-                "required": ["source"],
                 "type": "object",
                 "properties": {
                   "source": {
@@ -1979,6 +2031,12 @@
                     "updatedAt": {
                       "type": "string"
                     },
+                    "connectors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
                     "instructions": {
                       "type": "string"
                     },
@@ -1987,12 +2045,6 @@
                     },
                     "runnerId": {
                       "type": "string"
-                    },
-                    "connectors": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
                     },
                     "enabled": {
                       "type": "boolean"
@@ -2013,10 +2065,10 @@
                     "userId",
                     "title",
                     "updatedAt",
+                    "connectors",
                     "instructions",
                     "cron",
                     "runnerId",
-                    "connectors",
                     "enabled",
                     "deletedAt"
                   ],

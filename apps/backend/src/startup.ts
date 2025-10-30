@@ -5,8 +5,8 @@ import { parse } from './middlewares/validator.ts';
 
 const env = z.object({
   NODE_ENV: z.enum(['development', 'production']),
-  PORT: z.string().default('3000'),
-  ALLOWED_ORIGINS: z.string().default(''),
+  PORT: z.string().optional().default('3000'),
+  ALLOWED_ORIGINS: z.string().optional().default(''),
   CONNECTION_STRING: z.string(),
   GROQ_API_KEY: z.string(),
   QSTASH_TOKEN: z.string(),

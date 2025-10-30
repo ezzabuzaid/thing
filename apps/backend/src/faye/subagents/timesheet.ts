@@ -174,10 +174,12 @@ export const timesheetAgent: Agent = agent({
           .string()
           .max(8)
           .optional()
+          .optional()
           .default('USD')
           .describe('Currency code (e.g., USD, EUR)'),
         billable: z
           .boolean()
+          .optional()
           .optional()
           .default(true)
           .describe('Whether this entry is billable'),

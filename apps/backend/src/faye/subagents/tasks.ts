@@ -66,7 +66,7 @@ export const tasksAgent: Agent = agent({
       inputSchema: z.object({
         keywords: z.array(z.string().min(1)).min(1, 'keywords is required'),
         taskListId: z.string().optional(),
-        includeCompleted: z.boolean().default(false),
+        includeCompleted: z.boolean().optional().default(false),
       }),
       execute: async (input) => {
         const matchTasks: Prisma.TaskWhereInput[] = input.keywords.flatMap(

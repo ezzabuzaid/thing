@@ -17,11 +17,11 @@ export default async function (router: Hono) {
     validate((payload) => ({
       page: {
         select: payload.query.page,
-        against: z.coerce.number().int().positive().default(1),
+        against: z.coerce.number().int().positive().optional().default(1),
       },
       pageSize: {
         select: payload.query.pageSize,
-        against: z.coerce.number().int().min(1).max(100).default(20),
+        against: z.coerce.number().int().min(1).max(100).optional().default(20),
       },
     })),
     async (c) => {

@@ -6,8 +6,7 @@ import { Resend } from 'resend';
 import * as uuid from 'uuid';
 import { z } from 'zod';
 
-import { hackerNewsConnector } from '../faye/connectors/hackernews.ts';
-import { titleGeneratorAgent } from '../faye/v2.ts';
+import { runnerAgent, titleGeneratorAgent } from '../faye/v2.ts';
 import { authenticate } from '../middlewares/middleware.ts';
 import { validate } from '../middlewares/validator.ts';
 
@@ -18,6 +17,17 @@ import { validate } from '../middlewares/validator.ts';
 //   process.env.QSTASH_CURRENT_SIGNING_KEY = 'sig_7kYjw48mhY7kAjqNGcy6cr29RJ6r';
 //   process.env.QSTASH_NEXT_SIGNING_KEY = 'sig_5ZB6DVzB1wjE8S6rZ7eenA8Pdnhs';
 // }
+export const SCHEDULE_CONNECTORS: string[] = [
+  'web search',
+  'hackernews',
+  'reddit',
+  'twitter',
+  'github',
+  'gmail',
+  'notion',
+];
+
+export type ScheduleConnector = (typeof SCHEDULE_CONNECTORS)[number];
 
 type WithSlash<T extends string> = `/${T}`;
 const client = new Client();
@@ -37,6 +47,22 @@ function scheduleRun(
   });
 }
 export default async function (router: Hono) {
+  /**
+   * @openapi listScheduleConnectors
+   * @tags schedules
+   * @description List available connectors for schedules.
+   */
+  router.get(
+    '/schedules/connectors',
+    authenticate(),
+    validate(() => ({})),
+    async (c) => {
+      return c.json({
+        connectors: SCHEDULE_CONNECTORS,
+      });
+    },
+  );
+
   /**
    * @openapi createSchedule
    * @tags schedules
@@ -58,10 +84,7 @@ export default async function (router: Hono) {
       },
       connectors: {
         select: payload.body.connectors,
-        against: z
-          .array(z.enum(['reddit', 'web search', 'hackernews']))
-          .max(3)
-          .optional(),
+        against: z.array(z.string()).optional().optional().default([]),
       },
     })),
     async (c) => {
@@ -103,11 +126,11 @@ export default async function (router: Hono) {
     validate((payload) => ({
       page: {
         select: payload.query.page,
-        against: z.coerce.number().int().positive().default(1),
+        against: z.coerce.number().int().positive().optional().default(1),
       },
       pageSize: {
         select: payload.query.pageSize,
-        against: z.coerce.number().int().min(1).max(100).default(20),
+        against: z.coerce.number().int().min(1).max(100).optional().default(20),
       },
     })),
     async (c) => {
@@ -181,11 +204,7 @@ export default async function (router: Hono) {
       },
       connectors: {
         select: payload.body.connectors,
-        against: z
-          .array(z.enum(['reddit', 'web search', 'hackernews']))
-          .max(3)
-          .optional()
-          .default([]),
+        against: z.array(z.string()).optional().optional().default([]),
       },
     })),
     async (c) => {
@@ -294,7 +313,7 @@ export default async function (router: Hono) {
       },
       source: {
         select: payload.body.source,
-        against: z.enum(['user', 'system']).default('system'),
+        against: z.enum(['user', 'system']).optional().default('system'),
       },
     })),
     async (c) => {
@@ -311,6 +330,7 @@ export default async function (router: Hono) {
           runAt: new Date(),
         },
       });
+
       const { result, title } = await runSchedule(schedule);
 
       await prisma.scheduleRuns.update({
@@ -328,7 +348,7 @@ export default async function (router: Hono) {
           from: 'Acme <admin@schedules.january.sh>',
           to: [schedule.user.email],
           subject: `Prompt: ${schedule.title}`,
-          html: '<p>it works!</p>',
+          html: `<h1>${title}</h1><p>${result}</p>`,
         });
       }
 
@@ -418,8 +438,26 @@ export default async function (router: Hono) {
 
 async function runSchedule(schedule: Schedules) {
   const { text: result } = await generate(
-    hackerNewsConnector,
-    [user(schedule.instructions)],
+    runnerAgent,
+    [
+      user(
+        `
+        <ScheduleTitle>${schedule.title}</ScheduleTitle>
+        <ScheduleInstructions>${schedule.instructions}</ScheduleInstructions>
+        <Goal>Execute the schedule based on the title and instructions provided. Provide a detailed result of the execution.</Goal>
+        <Important>Your response will be used as is to be displayed in the UI.</Important>
+        <EnvironmentDetails>
+          Now is ${new Date().toISOString()}.
+          Today is ${new Date().toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}.
+        </EnvironmentDetails>
+        `,
+      ),
+    ],
     {},
   );
   const { text: title } = await generate(

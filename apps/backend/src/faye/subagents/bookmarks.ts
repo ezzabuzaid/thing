@@ -114,10 +114,11 @@ export const bookmarksAgent: Agent = agent({
         folderId: z.string().optional().describe('Filter by folder'),
         dateFrom: z.string().optional().describe('Updated after (ISO)'),
         dateTo: z.string().optional().describe('Updated before (ISO)'),
-        page: z.number().int().positive().default(1),
-        pageSize: z.number().int().min(1).max(100).default(20),
+        page: z.number().int().positive().optional().default(1),
+        pageSize: z.number().int().min(1).max(100).optional().default(20),
         sortBy: z
           .enum(['recent', 'oldest', 'title'])
+          .optional()
           .default('recent')
           .describe('Sort order'),
       }),

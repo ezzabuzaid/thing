@@ -1,10 +1,9 @@
 import { cn } from '@thing/shadcn';
-import { Check } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
+import { motion } from 'motion/react';
 import * as React from 'react';
 
 export type SelectorChipsProps = {
-  options: string[];
+  options?: string[];
   value?: string[];
   defaultValue?: string[];
   className?: string;
@@ -41,18 +40,17 @@ const SelectorChips: React.FC<SelectorChipsProps> = ({
   return (
     <div
       className={cn(
-        'flex w-full max-w-xl flex-wrap items-center gap-2 rounded-xl border border-border/70 bg-muted/40 p-3',
+        'border-border/70 bg-muted/40 flex w-full max-w-xl flex-wrap items-center gap-2 rounded-xl border p-3',
         className,
       )}
     >
-      {options.map((option) => {
+      {options?.map((option) => {
         const isSelected = selected.includes(option);
 
         return (
           <motion.button
             key={option}
             type="button"
-             
             whileTap={{ scale: 0.97 }}
             onClick={() => toggleChip(option)}
             className={cn(

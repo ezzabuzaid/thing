@@ -202,7 +202,14 @@ async function storeMessages(
 app.post('/chat', async (c) => {
   const { id: chatId, messages } = await c.req.json();
 
-  const result = execute(faye, messages, {}, '', c.req.raw.signal);
+  const result = execute(
+    faye,
+    messages,
+    {},
+    {
+      abortSignal: c.req.raw.signal,
+    },
+  );
   result.consumeStream();
   await prisma.chat.upsert({
     where: { id: chatId },
@@ -322,7 +329,7 @@ app.onError((error, context) => {
               detail: `Record not found`,
             },
           },
-          400,
+          404,
         );
       }
     }

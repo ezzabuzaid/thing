@@ -58,16 +58,6 @@ import {
   formatShortDate,
 } from '../logic/time.ts';
 
-const CONNECTOR_OPTIONS: string[] = [
-  'web search',
-  'hackernews',
-  'reddit',
-  'twitter',
-  'github',
-  'gmail',
-  'notion',
-];
-
 function PauseButton({
   id,
   className,
@@ -350,11 +340,12 @@ function ScheduleDetails({ id }: { id: string }) {
 }
 
 const Header = ({ schedule }: { schedule: GetScheduleById }) => {
+  const [, setSearchParams] = useSearchParams();
   const runAction = useAction('POST /schedules/{id}/run', {
     invalidate: ['GET /schedules/{id}'],
   });
   const archiveAction = useAction('DELETE /schedules/{id}', {
-    invalidate: ['GET /schedules', 'GET /schedules/{id}'],
+    invalidate: ['GET /schedules'],
     onSuccess: () => {
       setSearchParams((it) => {
         it.delete('id');
@@ -362,7 +353,6 @@ const Header = ({ schedule }: { schedule: GetScheduleById }) => {
       });
     },
   });
-  const [, setSearchParams] = useSearchParams();
 
   return (
     <div className="flex flex-col gap-3 p-4">
@@ -492,6 +482,8 @@ function CreateScheduleForm({
     );
   };
 
+  const connectorsQuery = useConnectors();
+
   return (
     <form onSubmit={handleSubmit} className="grid gap-3">
       <FormError error={error} />
@@ -513,9 +505,9 @@ function CreateScheduleForm({
       <div className="grid gap-2">
         <Label className="text-xs font-medium">Supported connectors</Label>
         <SelectorChips
-          options={CONNECTOR_OPTIONS}
+          options={connectorsQuery?.connectors}
           value={connectors}
-          onChange={setConnectors}
+          onChange={(its) => setConnectors(its)}
         />
       </div>
 
@@ -597,6 +589,7 @@ function ScheduleInstructionsField({
         onChange={(e) => onChange(e.target.value)}
         aria-label="Schedule instructions"
         rows={3}
+        className="max-h-48"
       />
     </div>
   );
@@ -675,6 +668,7 @@ function EditScheduleForm({
       },
     );
   };
+  const connectorsQuery = useConnectors();
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-3">
@@ -697,7 +691,7 @@ function EditScheduleForm({
       <div className="grid gap-2">
         <Label className="text-xs font-medium">Supported connectors</Label>
         <SelectorChips
-          options={CONNECTOR_OPTIONS}
+          options={connectorsQuery?.connectors}
           value={connectors}
           onChange={setConnectors}
         />
@@ -1155,4 +1149,8 @@ const RunsList = ({
 function nextRun(cron: string) {
   const interval = CronExpressionParser.parse(cron);
   return interval.next().toDate();
+}
+
+function useConnectors() {
+  return useData('GET /schedules/connectors', {}, { staleTime: Infinity }).data;
 }

@@ -33,6 +33,7 @@
     "/outputs/delete-chat.ts",
     "/outputs/delete-message.ts",
     "/outputs/list-thoughts.ts",
+    "/outputs/list-schedule-connectors.ts",
     "/outputs/create-schedule.ts",
     "/outputs/list-schedules.ts",
     "/outputs/get-schedule-by-id.ts",
