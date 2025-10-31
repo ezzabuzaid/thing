@@ -7,6 +7,8 @@ import { RouterProvider } from 'react-router/dom';
 import { authClient } from './app/auth-client.ts';
 import ChatBot from './app/routes/ChatBot.tsx';
 import Layout from './app/routes/Layout.tsx';
+import LegalPrivacyPolicy from './app/routes/legal-privacy-policy.tsx';
+import LegalTermsServices from './app/routes/legal-terms-services.tsx';
 import Login from './app/routes/login.tsx';
 import Marketplace from './app/routes/marketplace.tsx';
 import Schedules from './app/routes/schedules.tsx';
@@ -62,6 +64,14 @@ const router = createBrowserRouter([
   {
     path: '/login',
     Component: Login,
+  },
+  {
+    path: '/legal/privacy-policy',
+    Component: LegalPrivacyPolicy,
+  },
+  {
+    path: '/legal/terms-services',
+    Component: LegalTermsServices,
   },
 ]);
 const root = createRoot(document.getElementById('root') as HTMLElement);

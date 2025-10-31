@@ -89,7 +89,7 @@ export default function Login() {
               Thing
             </h1>
             <p className="text-muted-foreground mt-2 text-base">
-              A space to record your precious moments.
+              The digital you.
             </p>
           </header>
           <main className="space-y-6">
@@ -113,14 +113,14 @@ export default function Login() {
               By continuing, you agree to our{' '}
               <a
                 className="text-primary font-medium hover:underline"
-                href="/terms"
+                href="/legal/terms-services"
               >
                 Terms of Service
               </a>{' '}
               and{' '}
               <a
                 className="text-primary font-medium hover:underline"
-                href="/privacy"
+                href="/legal/privacy-policy"
               >
                 Privacy Policy
               </a>
