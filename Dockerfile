@@ -7,16 +7,17 @@ WORKDIR /app
 COPY package-lock.json package.json ./
 COPY --parents **/package.json .
 
-# Cache .nx directory to speed up builds
-RUN --mount=type=cache,target=/root/.npm npm i --legacy-peer-deps
+# Cache .nx directory so it retrive from cache next time
+RUN --mount=type=cache,target=/root/.npm npm ci --legacy-peer-deps
 COPY . .
 
 # Keep the API URL empty to use the same host
 ENV VITE_API_URL=/
 ENV NX_DAEMON=false
 
-# Build required apps and packages
+# Cache .nx directory so it retrive from cache next time
 RUN --mount=type=cache,id=nx,target=/app/.nx ./node_modules/.bin/nx run-many -t build --projects backend,frontend -c production
+
 
 FROM builder AS packages
 WORKDIR /app
@@ -38,18 +39,22 @@ FROM base AS start
 WORKDIR /app
 
 COPY --from=packages /app/all-dists ./packages
-COPY --from=builder  /app/apps/backend/package.json ./apps/backend/package.json
-COPY --from=builder /app/apps/backend/dist ./apps/backend/dist
 
-# Make Prisma available in the root for migrations
-COPY --from=builder /app/packages/persistence/db/schema.prisma .
+# Frontend APPS
+COPY --from=builder /app/apps/frontend/dist ./apps/frontend/dist
+
+
+# Backend APPS
+COPY --from=builder /app/apps/backend/package.json ./apps/backend/package.json
+COPY --from=builder /app/apps/backend/dist ./apps/backend/dist
 
 # Install production dependencies
 COPY --from=builder /app/package.json /app/package-lock.json ./
+RUN npm config set registry https://registry.npmjs.org/
 RUN --mount=type=cache,id=prod-deps,target=/root/.npm npm ci --legacy-peer-deps --omit=dev --ignore-scripts
 
-# Copy frontend
-COPY --from=builder /app/dist/apps/frontend ./dist/apps/frontend
+# Copy generated prisma client to the newly created node_modules from above run
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
@@ -58,3 +63,4 @@ USER node
 EXPOSE 3000
 HEALTHCHECK CMD wget --no-verbose --spider --tries=1 http://localhost:3000 || exit 1
 CMD ["node", "apps/backend"]
+# CMD ["sleep", "infinity"]

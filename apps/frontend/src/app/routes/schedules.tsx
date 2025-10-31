@@ -15,24 +15,12 @@ import {
   DialogTrigger,
   Input,
   Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Separator,
   Spinner,
   Textarea,
 } from '@thing/shadcn';
 import { useAction, useData } from '@thing/ui';
 import { CronExpressionParser } from 'cron-parser';
-import {
-  addDays,
-  eachMonthOfInterval,
-  format,
-  getDaysInMonth,
-  startOfWeek,
-} from 'date-fns';
 import {
   Archive,
   ChevronLeft,
@@ -42,12 +30,15 @@ import {
   Play,
   PlayCircle,
   Repeat,
+  Upload,
   X,
 } from 'lucide-react';
 import React from 'react';
 import { useSearchParams } from 'react-router';
 
 import SelectorChips from '../components/ChipSelector.tsx';
+import { CronBuilder } from '../components/CronBuilder.tsx';
+import { IconButton } from '../components/IconButton.tsx';
 import { Title } from '../components/Title.tsx';
 import { Message, MessageContent } from '../elements/Message.tsx';
 import { Response } from '../elements/Response.tsx';
@@ -407,6 +398,7 @@ const Header = ({ schedule }: { schedule: GetScheduleById }) => {
           <ResumeButton id={schedule.id} />
         )}
 
+        <PublishToMarketplaceButton schedule={schedule} />
         <Button
           type="button"
           variant={'outline'}
@@ -712,317 +704,6 @@ function EditScheduleForm({
   );
 }
 
-type Frequency = 'once' | 'daily' | 'weekly' | 'monthly' | 'yearly';
-
-type ComposeCronArgs = {
-  frequency: Frequency;
-  time: string; // HH:mm
-  onceDate: string; // YYYY-MM-DD
-  weekDay: number; // 0..6
-  monthDay: number; // 1..31
-  yearMonth: number; // 1..12
-};
-
-// composingCron: Pure helper that builds a 5-field cron from simple inputs
-// Note: Standard 5-field cron has no year, so "once" becomes a yearly cron for the selected date.
-const composingCron = ({
-  frequency,
-  time,
-  onceDate,
-  weekDay,
-  monthDay,
-  yearMonth,
-}: ComposeCronArgs): string => {
-  const [hoursStr, minutesStr] = time.split(':');
-  const h = Math.max(0, Math.min(23, Number(hoursStr) || 0));
-  const m = Math.max(0, Math.min(59, Number(minutesStr) || 0));
-
-  if (frequency === 'daily') {
-    return `${m} ${h} * * *`;
-  }
-  if (frequency === 'weekly') {
-    const dow = Math.max(0, Math.min(6, weekDay));
-    return `${m} ${h} * * ${dow}`;
-  }
-  if (frequency === 'monthly') {
-    const dom = Math.max(1, Math.min(31, monthDay));
-    return `${m} ${h} ${dom} * *`;
-  }
-  if (frequency === 'yearly') {
-    const dom = Math.max(1, Math.min(31, monthDay));
-    const mon = Math.max(1, Math.min(12, yearMonth));
-    return `${m} ${h} ${dom} ${mon} *`;
-  }
-  // once
-  const d = new Date(onceDate);
-  const dom = d.getDate();
-  const mon = d.getMonth() + 1;
-  return `${m} ${h} ${dom} ${mon} *`;
-};
-
-function CronBuilder({
-  cron,
-  onCronChange,
-}: {
-  cron: string;
-  onCronChange: (cron: string) => void;
-}) {
-  const today = React.useMemo(() => {
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${dd}`;
-  }, []);
-
-  const [frequency, setFrequency] = React.useState<Frequency>('daily');
-  const [hour, setHour] = React.useState<number>(9);
-  const [onceDate, setOnceDate] = React.useState<string>(today);
-  const [weekDay, setWeekDay] = React.useState<number>(1); // 1=Mon
-  const [monthDay, setMonthDay] = React.useState<number>(1);
-  const [yearMonth, setYearMonth] = React.useState<number>(1);
-
-  const cronValue = React.useMemo(() => {
-    const hh = String(hour).padStart(2, '0');
-    const time = `${hh}:00`;
-    return composingCron({
-      frequency,
-      time,
-      onceDate,
-      weekDay,
-      monthDay,
-      yearMonth,
-    });
-  }, [frequency, hour, onceDate, weekDay, monthDay, yearMonth]);
-
-  React.useEffect(() => {
-    onCronChange(cronValue);
-  }, [cronValue, onCronChange]);
-
-  return (
-    <div className="grid gap-2">
-      <div className="grid gap-1">
-        <Label htmlFor="cron-frequency" className="text-xs font-medium">
-          Frequency
-        </Label>
-        <Select
-          value={frequency}
-          onValueChange={(v) => setFrequency(v as Frequency)}
-        >
-          <SelectTrigger id="cron-frequency" aria-label="Select frequency">
-            <SelectValue placeholder="Select frequency" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="once">Once</SelectItem>
-            <SelectItem value="daily">Daily</SelectItem>
-            <SelectItem value="weekly">Weekly</SelectItem>
-            <SelectItem value="monthly">Monthly</SelectItem>
-            <SelectItem value="yearly">Yearly</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <HourField value={hour} onChange={setHour} />
-
-      {frequency === 'once' && (
-        <div className="grid gap-1">
-          <Label className="text-xs font-medium" htmlFor="cron-once-date">
-            Date
-          </Label>
-          <Input
-            id="cron-once-date"
-            type="date"
-            value={onceDate}
-            onChange={(e) => setOnceDate(e.target.value)}
-            aria-label="Select date"
-          />
-          <span className="text-muted-foreground text-xs">
-            Note: Cron doesn't include the year. "Once" will create a yearly
-            cron for the chosen date; you can disable the schedule after it
-            runs.
-          </span>
-        </div>
-      )}
-
-      {frequency === 'weekly' && (
-        <WeekField value={weekDay} onChange={setWeekDay} />
-      )}
-
-      {(frequency === 'monthly' || frequency === 'yearly') && (
-        <div className="grid grid-cols-2 gap-2">
-          <MonthField
-            value={monthDay}
-            onChange={setMonthDay}
-            maxDays={
-              frequency === 'yearly'
-                ? getDaysInMonth(
-                    new Date(new Date().getFullYear(), yearMonth - 1, 1),
-                  )
-                : 31
-            }
-          />
-          {frequency === 'yearly' && (
-            <YearField
-              value={yearMonth}
-              onChange={(n) => {
-                setYearMonth(n);
-                // Clamp day if needed when month changes
-                const md = getDaysInMonth(
-                  new Date(new Date().getFullYear(), n - 1, 1),
-                );
-                setMonthDay((d) => Math.min(d, md));
-              }}
-            />
-          )}
-        </div>
-      )}
-
-      <div className="text-muted-foreground text-xs">Cron preview: {cron}</div>
-    </div>
-  );
-}
-
-// WeekField: choose day of week (0=Sun..6=Sat) using date-fns for labels
-function WeekField({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (n: number) => void;
-}) {
-  const start = React.useMemo(
-    () => startOfWeek(new Date(), { weekStartsOn: 0 }),
-    [],
-  );
-  const days = React.useMemo(
-    () => Array.from({ length: 7 }, (_, i) => addDays(start, i)),
-    [start],
-  );
-  return (
-    <div className="grid gap-1">
-      <Label htmlFor="cron-weekday" className="text-xs font-medium">
-        Day of week
-      </Label>
-      <Select value={String(value)} onValueChange={(v) => onChange(Number(v))}>
-        <SelectTrigger id="cron-weekday" aria-label="Select day of week">
-          <SelectValue placeholder="Select day of week" />
-        </SelectTrigger>
-        <SelectContent>
-          {days.map((d, i) => (
-            <SelectItem key={i} value={String(i)}>
-              {format(d, 'EEEE')}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  );
-}
-
-// MonthField: choose day of month with optional cap based on month length
-function MonthField({
-  value,
-  onChange,
-  maxDays = 31,
-}: {
-  value: number;
-  onChange: (n: number) => void;
-  maxDays?: number;
-}) {
-  const days = React.useMemo(
-    () => Array.from({ length: maxDays }, (_, i) => i + 1),
-    [maxDays],
-  );
-  return (
-    <div className="grid gap-1">
-      <Label htmlFor="cron-dom" className="text-xs font-medium">
-        Day of month
-      </Label>
-      <Select value={String(value)} onValueChange={(v) => onChange(Number(v))}>
-        <SelectTrigger id="cron-dom" aria-label="Day of month">
-          <SelectValue placeholder="Day of month" />
-        </SelectTrigger>
-        <SelectContent>
-          {days.map((d) => (
-            <SelectItem key={d} value={String(d)}>
-              {d}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  );
-}
-
-function YearField({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (n: number) => void;
-}) {
-  const months = React.useMemo(
-    () =>
-      eachMonthOfInterval({
-        start: new Date(new Date().getFullYear(), 0, 1),
-        end: new Date(new Date().getFullYear(), 11, 31),
-      }).map((d, idx) => ({ idx: idx + 1, label: format(d, 'LLLL') })),
-    [],
-  );
-  return (
-    <div className="grid gap-1">
-      <Label htmlFor="cron-month" className="text-xs font-medium">
-        Month
-      </Label>
-      <Select value={String(value)} onValueChange={(v) => onChange(Number(v))}>
-        <SelectTrigger id="cron-month" aria-label="Select month">
-          <SelectValue placeholder="Select month" />
-        </SelectTrigger>
-        <SelectContent>
-          {months.map((m) => (
-            <SelectItem key={m.idx} value={String(m.idx)}>
-              {m.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  );
-}
-
-// HourField: select hour of day (0..23) with HH:00 labels
-function HourField({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (n: number) => void;
-}) {
-  const hours = React.useMemo(
-    () => Array.from({ length: 24 }, (_, i) => i),
-    [],
-  );
-  return (
-    <div className="grid gap-1">
-      <Label htmlFor="cron-hour" className="text-xs font-medium">
-        Time
-      </Label>
-      <Select value={String(value)} onValueChange={(v) => onChange(Number(v))}>
-        <SelectTrigger id="cron-hour" aria-label="Select hour">
-          <SelectValue placeholder="Select hour" />
-        </SelectTrigger>
-        <SelectContent>
-          {hours.map((h) => (
-            <SelectItem key={h} value={String(h)}>
-              {format(new Date(2000, 0, 1, h, 0), 'h a')}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  );
-}
-
 const RunsList = ({
   runs,
   cron,
@@ -1153,4 +834,260 @@ function nextRun(cron: string) {
 
 function useConnectors() {
   return useData('GET /schedules/connectors', {}, { staleTime: Infinity }).data;
+}
+
+function PublishToMarketplaceButton({
+  schedule,
+}: {
+  schedule: GetScheduleById;
+}) {
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <>
+      <IconButton
+        title="Publish to marketplaces"
+        onClick={() => setOpen(true)}
+        icon={Upload}
+      />
+
+      <PublishToMarketplaceDialog
+        schedule={schedule}
+        open={open}
+        onOpenChange={setOpen}
+      />
+    </>
+  );
+}
+
+function PublishToMarketplaceDialog({
+  schedule,
+  open,
+  onOpenChange,
+}: {
+  schedule: GetScheduleById;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const publish = useAction(
+    'POST /schedules/{scheduleId}/publish-to-marketplace',
+    {
+      invalidate: ['GET /marketplace/templates'],
+    },
+  );
+
+  const [title, setTitle] = React.useState(schedule.title);
+  const [instructions, setInstructions] = React.useState(schedule.instructions);
+  const [cron, setCron] = React.useState(schedule.cron);
+  const [connectors, setConnectors] = React.useState<string[]>(
+    schedule.connectors,
+  );
+  const [description, setDescription] = React.useState('');
+  const [tags, setTags] = React.useState<string[]>([]);
+  const [tagInput, setTagInput] = React.useState('');
+  const [error, setError] = React.useState<string | null>(null);
+
+  const connectorsQuery = useConnectors();
+
+  const handleAddTag = () => {
+    const trimmed = tagInput.trim();
+    if (trimmed && tags.length < 3 && !tags.includes(trimmed)) {
+      setTags([...tags, trimmed]);
+      setTagInput('');
+    }
+  };
+
+  const handleRemoveTag = (tag: string) => {
+    setTags(tags.filter((t) => t !== tag));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!title.trim() || !instructions.trim() || !cron.trim()) {
+      setError('Please fill in title, instructions, and schedule');
+      return;
+    }
+
+    if (!description.trim()) {
+      setError('Please provide a description');
+      return;
+    }
+
+    if (tags.length === 0) {
+      setError('Please add at least one tag');
+      return;
+    }
+
+    publish.mutate(
+      {
+        scheduleId: schedule.id,
+        title: title.trim(),
+        instructions: instructions.trim(),
+        suggestedCron: cron.trim(),
+        connectors,
+        description: description.trim(),
+        tags,
+      },
+      {
+        onSuccess: () => {
+          onOpenChange(false);
+          // Reset form
+          setTitle(schedule.title);
+          setInstructions(schedule.instructions);
+          setCron(schedule.cron);
+          setConnectors(schedule.connectors);
+          setDescription('');
+          setTags([]);
+          setTagInput('');
+        },
+        onError: (err: any) => {
+          setError(err?.message ?? 'Failed to publish to marketplace');
+        },
+      },
+    );
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Publish to Marketplace</DialogTitle>
+          <p className="text-muted-foreground text-sm">
+            Review and customize your schedule before sharing it with the community
+          </p>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="grid gap-4">
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="grid gap-2">
+            <Label htmlFor="title">
+              Title <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter schedule title"
+            />
+          </div>
+
+          <CronBuilder cron={cron} onCronChange={setCron} />
+
+          <div className="grid gap-2">
+            <Label htmlFor="instructions">
+              Instructions <span className="text-destructive">*</span>
+            </Label>
+            <Textarea
+              id="instructions"
+              value={instructions}
+              onChange={(e) => setInstructions(e.target.value)}
+              placeholder="Enter schedule instructions"
+              rows={6}
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label className="text-xs font-medium">Supported connectors</Label>
+            <SelectorChips
+              options={connectorsQuery?.connectors}
+              value={connectors}
+              onChange={(its) => setConnectors(its)}
+            />
+          </div>
+
+          <Separator />
+
+          <div className="grid gap-2">
+            <Label htmlFor="description">
+              Description <span className="text-destructive">*</span>
+            </Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Describe what this schedule does and who it's for..."
+              rows={4}
+            />
+            <p className="text-muted-foreground text-xs">
+              Help others understand when and why to use this schedule
+            </p>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="tags">
+              Tags <span className="text-destructive">*</span>
+            </Label>
+            <div className="flex gap-2">
+              <Input
+                id="tags"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddTag();
+                  }
+                }}
+                placeholder="e.g. productivity, news, automation"
+                disabled={tags.length >= 3}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleAddTag}
+                disabled={tags.length >= 3 || !tagInput.trim()}
+              >
+                Add
+              </Button>
+            </div>
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {tags.map((tag) => (
+                  <Badge key={tag} variant="secondary" className="gap-1">
+                    {tag}
+                    <X
+                      className="size-3 cursor-pointer"
+                      onClick={() => handleRemoveTag(tag)}
+                    />
+                  </Badge>
+                ))}
+              </div>
+            )}
+            <p className="text-muted-foreground text-xs">
+              {tags.length}/3 tags added
+            </p>
+          </div>
+
+          <Separator />
+
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={publish.isPending}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={publish.isPending}>
+              {publish.isPending ? (
+                <span className="flex items-center gap-2">
+                  <Spinner className="size-4" /> Publishing…
+                </span>
+              ) : (
+                'Publish to Marketplace'
+              )}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
 }

@@ -1,5 +1,5 @@
 import { groq } from '@ai-sdk/groq';
-import { type Agent, agent, instructions } from '@deepagents/agent';
+import { type Agent, agent, instructions, toState } from '@deepagents/agent';
 import { extract } from '@extractus/article-extractor';
 import { type Prisma, prisma } from '@thing/db';
 import { tool } from 'ai';
@@ -20,9 +20,9 @@ async function extractMetadata(url: string) {
  * Ensure a folder exists by creating a default "Others" folder if needed.
  * This is necessary because folderId is NOT NULL in the schema.
  */
-async function ensureDefaultFolder() {
+async function ensureDefaultFolder(userId: string) {
   const existing = await prisma.bookmarkFolder.findFirst({
-    where: { name: 'Others' },
+    where: { name: 'Others', userId },
   });
 
   if (existing) return existing;
@@ -32,6 +32,7 @@ async function ensureDefaultFolder() {
       name: 'Others',
       description: 'Default folder for unorganized bookmarks',
       color: '#94a3b8',
+      userId,
     },
   });
 }
@@ -70,16 +71,19 @@ export const bookmarksAgent: Agent = agent({
           }),
         ),
       }),
-      execute: async (input) => {
+      execute: async (input, options) => {
+        const state = toState<{ userId: string }>(options);
         const results = [];
-        const defaultFolder = await ensureDefaultFolder();
+        const defaultFolder = await ensureDefaultFolder(state.userId);
 
         for (const bookmark of input.bookmarks) {
           // Extract metadata
           const metadata = await extractMetadata(bookmark.url);
 
           // Create thought and bookmark
-          const thought = await prisma.thought.create({ data: {} });
+          const thought = await prisma.thought.create({
+            data: { userId: state.userId },
+          });
 
           const created = await prisma.bookmark.create({
             data: {
@@ -122,8 +126,10 @@ export const bookmarksAgent: Agent = agent({
           .default('recent')
           .describe('Sort order'),
       }),
-      execute: async (input) => {
+      execute: async (input, options) => {
+        const state = toState<{ userId: string }>(options);
         const where: Prisma.BookmarkWhereInput = {
+          thought: { userId: state.userId },
           ...(input.folderId && { folderId: input.folderId }),
           ...(input.query && {
             OR: [
@@ -136,11 +142,13 @@ export const bookmarksAgent: Agent = agent({
           ...(input.dateFrom && {
             thought: {
               updatedAt: { gte: new Date(input.dateFrom) },
+              userId: state.userId,
             },
           }),
           ...(input.dateTo && {
             thought: {
               updatedAt: { lte: new Date(input.dateTo) },
+              userId: state.userId,
             },
           }),
         };
@@ -187,13 +195,17 @@ export const bookmarksAgent: Agent = agent({
       inputSchema: z.object({
         bookmarkIds: z.array(z.string()).min(1),
       }),
-      execute: async (input) => {
+      execute: async (input, options) => {
+        const state = toState<{ userId: string }>(options);
         await prisma.$transaction([
           prisma.bookmark.deleteMany({
-            where: { id: { in: input.bookmarkIds } },
+            where: {
+              id: { in: input.bookmarkIds },
+              thought: { userId: state.userId },
+            },
           }),
           prisma.thought.deleteMany({
-            where: { id: { in: input.bookmarkIds } },
+            where: { id: { in: input.bookmarkIds }, userId: state.userId },
           }),
         ]);
         return { deleted: input.bookmarkIds.length };
@@ -202,9 +214,10 @@ export const bookmarksAgent: Agent = agent({
     getBookmarkDetails: tool({
       description: 'Get bookmark details with metadata and folder.',
       inputSchema: z.object({ id: z.string() }),
-      execute: async ({ id }) => {
-        const bookmark = await prisma.bookmark.findUniqueOrThrow({
-          where: { id },
+      execute: async ({ id }, options) => {
+        const state = toState<{ userId: string }>(options);
+        const bookmark = await prisma.bookmark.findFirstOrThrow({
+          where: { id, thought: { userId: state.userId } },
           include: { folder: true, thought: true },
         });
         return bookmark;
@@ -219,12 +232,14 @@ export const bookmarksAgent: Agent = agent({
         description: z.string().optional(),
         folderId: z.string().optional(),
       }),
-      execute: async ({ id, ...updates }) => {
-        const bookmark = await prisma.bookmark.update({
-          where: { id },
-          data: updates,
+      execute: async ({ id, ...updates }, options) => {
+        const state = toState<{ userId: string }>(options);
+        // Ensure the bookmark belongs to the user
+        await prisma.bookmark.findFirstOrThrow({
+          where: { id, thought: { userId: state.userId } },
+          select: { id: true },
         });
-        return bookmark;
+        return prisma.bookmark.update({ where: { id }, data: updates });
       },
     }),
     manageFolder: tool({
@@ -236,7 +251,8 @@ export const bookmarksAgent: Agent = agent({
         description: z.string().nullish(),
         color: z.string().nullish(),
       }),
-      execute: async (input) => {
+      execute: async (input, options) => {
+        const state = toState<{ userId: string }>(options);
         switch (input.operation) {
           case 'create': {
             if (!input.name) return { error: 'name required for create' };
@@ -245,6 +261,7 @@ export const bookmarksAgent: Agent = agent({
                 name: input.name,
                 description: input.description,
                 color: input.color,
+                userId: state.userId,
               },
             });
           }
@@ -252,6 +269,11 @@ export const bookmarksAgent: Agent = agent({
           case 'update': {
             if (!input.folderId)
               return { error: 'folderId required for update' };
+            // Ensure ownership
+            await prisma.bookmarkFolder.findFirstOrThrow({
+              where: { id: input.folderId, userId: state.userId },
+              select: { id: true },
+            });
             return await prisma.bookmarkFolder.update({
               where: { id: input.folderId },
               data: {
@@ -266,6 +288,7 @@ export const bookmarksAgent: Agent = agent({
 
           case 'list': {
             const folders = await prisma.bookmarkFolder.findMany({
+              where: { userId: state.userId },
               orderBy: { name: 'asc' },
             });
             return folders;

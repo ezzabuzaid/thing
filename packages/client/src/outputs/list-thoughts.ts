@@ -14,6 +14,7 @@ export type ListThoughts = {
       folderId: string;
     };
     id: string;
+    userId: string;
     updatedAt: string;
   }[];
   pagination: {

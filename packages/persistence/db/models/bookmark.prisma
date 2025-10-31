@@ -1,11 +1,17 @@
 model Thought {
   id String @id @default(dbgenerated("uuidv7()")) @db.Uuid
 
+  // References
+  userId String
+
   // Relations
   bookmark Bookmark?
 
   // Audits
   updatedAt DateTime @updatedAt
+
+  // Constraints
+  @@index([userId])
 }
 
 model BookmarkFolder {
@@ -14,11 +20,17 @@ model BookmarkFolder {
   description String?
   color       String?
 
+  // References
+  userId String
+
   // Relations
   bookmarks Bookmark[]
 
   // Audits
   updatedAt DateTime @updatedAt
+
+  // Constraints
+  @@index([userId])
 }
 
 model Bookmark {
@@ -29,12 +41,13 @@ model Bookmark {
   image       String?
   favicon     String?
   publishedAt String?
-  userContext     String?
-  folderId    String @db.Uuid
+  userContext String?
+  folderId    String  @db.Uuid
 
   // Relations
-  thought Thought         @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  thought Thought        @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   folder  BookmarkFolder @relation(fields: [folderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
+  // Constraints
   @@index([folderId])
 }

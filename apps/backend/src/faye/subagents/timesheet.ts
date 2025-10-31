@@ -1,5 +1,5 @@
 import { groq } from '@ai-sdk/groq';
-import { type Agent, agent } from '@deepagents/agent';
+import { type Agent, agent, toState } from '@deepagents/agent';
 import { type Prisma, prisma } from '@thing/db';
 import { tool } from 'ai';
 import z from 'zod';
@@ -32,10 +32,12 @@ export const timesheetAgent: Agent = agent({
       inputSchema: z.object({
         name: z.string().max(160).describe('Client name'),
       }),
-      execute: async (input) => {
+      execute: async (input, options) => {
+        const state = toState<{ userId: string }>(options);
         const client = await prisma.client.create({
           data: {
             name: input.name,
+            userId: state.userId,
           },
         });
         return {
@@ -54,10 +56,12 @@ export const timesheetAgent: Agent = agent({
           .transform((arr) => (arr ?? []).map((s) => s.trim()).filter(Boolean))
           .describe('Keywords to match in client name; all must match (AND).'),
       }),
-      execute: async (input) => {
+      execute: async (input, options) => {
+        const state = toState<{ userId: string }>(options);
         const where: Prisma.ClientWhereInput =
           input.keywords.length > 0
             ? {
+                userId: state.userId,
                 OR: input.keywords.map((it) => ({
                   name: {
                     contains: it,
@@ -65,7 +69,7 @@ export const timesheetAgent: Agent = agent({
                   },
                 })),
               }
-            : {};
+            : { userId: state.userId };
 
         const clients = await prisma.client.findMany({
           where,
@@ -94,11 +98,18 @@ export const timesheetAgent: Agent = agent({
         clientId: z.string().uuid().describe('Client ID'),
         name: z.string().max(160).describe('Project name'),
       }),
-      execute: async (input) => {
+      execute: async (input, options) => {
+        const state = toState<{ userId: string }>(options);
+        // Ensure client belongs to user
+        await prisma.client.findFirstOrThrow({
+          where: { id: input.clientId, userId: state.userId },
+          select: { id: true },
+        });
         const project = await prisma.project.create({
           data: {
             clientId: input.clientId,
             name: input.name,
+            userId: state.userId,
           },
           include: {
             client: true,
@@ -121,8 +132,10 @@ export const timesheetAgent: Agent = agent({
           .transform((arr) => (arr ?? []).map((s) => s.trim()).filter(Boolean))
           .describe('Keywords to match in project name; all must match (AND).'),
       }),
-      execute: async (input) => {
+      execute: async (input, options) => {
+        const state = toState<{ userId: string }>(options);
         const where: Prisma.ProjectWhereInput = {
+          userId: state.userId,
           ...(input.clientId ? { clientId: input.clientId } : {}),
           ...(input.keywords.length > 0
             ? {
@@ -185,7 +198,13 @@ export const timesheetAgent: Agent = agent({
           .describe('Whether this entry is billable'),
         note: z.string().optional().describe('Optional note about the work'),
       }),
-      execute: async (input) => {
+      execute: async (input, options) => {
+        const state = toState<{ userId: string }>(options);
+        // Ensure project belongs to user
+        await prisma.project.findFirstOrThrow({
+          where: { id: input.projectId, userId: state.userId },
+          select: { id: true },
+        });
         const entry = await prisma.hourEntry.create({
           data: {
             projectId: input.projectId,
@@ -195,6 +214,7 @@ export const timesheetAgent: Agent = agent({
             currency: input.currency,
             billable: input.billable,
             note: input.note,
+            userId: state.userId,
           },
           include: {
             project: {
@@ -227,10 +247,14 @@ export const timesheetAgent: Agent = agent({
       inputSchema: z.object({
         entryId: z.string().uuid().describe('Hour entry ID to delete'),
       }),
-      execute: async (input) => {
-        await prisma.hourEntry.delete({
-          where: { id: input.entryId },
+      execute: async (input, options) => {
+        const state = toState<{ userId: string }>(options);
+        // Ensure ownership
+        await prisma.hourEntry.findFirstOrThrow({
+          where: { id: input.entryId, userId: state.userId },
+          select: { id: true },
         });
+        await prisma.hourEntry.delete({ where: { id: input.entryId } });
 
         return {
           success: true,
@@ -250,8 +274,10 @@ export const timesheetAgent: Agent = agent({
           .optional()
           .describe('Show only billable entries'),
       }),
-      execute: async (input) => {
+      execute: async (input, options) => {
+        const state = toState<{ userId: string }>(options);
         const where: Prisma.HourEntryWhereInput = {
+          userId: state.userId,
           ...{ projectId: input.projectId },
           ...(input.startDate || input.endDate
             ? {

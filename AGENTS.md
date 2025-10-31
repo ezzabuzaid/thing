@@ -9,6 +9,17 @@
 - Don't duplicate error handling - it's already global
 - For existence checks without using data: `await prisma.modelName.findUniqueOrThrow({ where: { id } })`
 - Custom error messages only when necessary
+- To throw errors use `HTTPException` class from Hono:
+
+```ts
+throw new HTTPException(400, {
+  message: '...',
+  cause: {
+    code: '<feature/domain>/<code>',
+    detail: 'instructive detail',
+  },
+});
+```
 
 ### Date & Time
 

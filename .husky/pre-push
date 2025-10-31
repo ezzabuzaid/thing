@@ -1,1 +1,1 @@
-npx nx run-many --targets build --prod --parallel 1
+npx nx run-many --targets build --prod

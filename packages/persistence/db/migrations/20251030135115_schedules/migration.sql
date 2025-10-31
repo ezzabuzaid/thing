@@ -126,6 +126,28 @@ CREATE TABLE "CommandPalette" (
 );
 
 -- CreateTable
+CREATE TABLE "ScheduleTemplates" (
+    "id" UUID NOT NULL DEFAULT uuidv7(),
+    "title" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "instructions" TEXT NOT NULL,
+    "suggestedCron" TEXT NOT NULL,
+    "connectors" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "isOfficial" BOOLEAN NOT NULL DEFAULT false,
+    "published" BOOLEAN NOT NULL DEFAULT true,
+    "category" TEXT NOT NULL,
+    "tags" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "installCount" INTEGER NOT NULL DEFAULT 0,
+    "viewCount" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+    "authorId" TEXT NOT NULL,
+
+    CONSTRAINT "ScheduleTemplates_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Media" (
     "id" UUID NOT NULL DEFAULT uuidv7(),
     "name" TEXT NOT NULL,
@@ -139,16 +161,49 @@ CREATE TABLE "Media" (
 );
 
 -- CreateTable
+CREATE TABLE "Reminder" (
+    "id" UUID NOT NULL DEFAULT uuidv7(),
+    "title" TEXT NOT NULL,
+    "notes" TEXT,
+    "remindAt" TIMESTAMP(3) NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'scheduled',
+    "source" TEXT,
+    "completedAt" TIMESTAMP(3),
+    "cancelledAt" TIMESTAMP(3),
+    "userId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "Reminder_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Schedules" (
     "id" UUID NOT NULL DEFAULT uuidv7(),
-    "userId" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "instructions" TEXT NOT NULL,
     "cron" TEXT NOT NULL,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "runnerId" TEXT NOT NULL,
+    "connectors" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "enabled" BOOLEAN NOT NULL DEFAULT true,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+    "userId" TEXT NOT NULL,
 
     CONSTRAINT "Schedules_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ScheduleRuns" (
+    "id" UUID NOT NULL DEFAULT uuidv7(),
+    "title" TEXT,
+    "result" TEXT,
+    "scheduleId" UUID NOT NULL,
+    "runAt" TIMESTAMP(3) NOT NULL,
+    "completedAt" TIMESTAMP(3),
+
+    CONSTRAINT "ScheduleRuns_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -283,10 +338,31 @@ CREATE UNIQUE INDEX "user_email_key" ON "user"("email");
 CREATE UNIQUE INDEX "session_token_key" ON "session"("token");
 
 -- CreateIndex
+CREATE INDEX "ScheduleTemplates_authorId_idx" ON "ScheduleTemplates"("authorId");
+
+-- CreateIndex
+CREATE INDEX "ScheduleTemplates_category_idx" ON "ScheduleTemplates"("category");
+
+-- CreateIndex
+CREATE INDEX "ScheduleTemplates_published_idx" ON "ScheduleTemplates"("published");
+
+-- CreateIndex
 CREATE INDEX "Media_userId_idx" ON "Media"("userId");
 
 -- CreateIndex
+CREATE INDEX "Reminder_userId_idx" ON "Reminder"("userId");
+
+-- CreateIndex
+CREATE INDEX "Reminder_status_idx" ON "Reminder"("status");
+
+-- CreateIndex
+CREATE INDEX "Reminder_remindAt_idx" ON "Reminder"("remindAt");
+
+-- CreateIndex
 CREATE INDEX "Schedules_userId_idx" ON "Schedules"("userId");
+
+-- CreateIndex
+CREATE INDEX "ScheduleRuns_scheduleId_idx" ON "ScheduleRuns"("scheduleId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "TasksList_title_key" ON "TasksList"("title");
@@ -338,6 +414,18 @@ ALTER TABLE "Message" ADD CONSTRAINT "Message_chatId_fkey" FOREIGN KEY ("chatId"
 
 -- AddForeignKey
 ALTER TABLE "Part" ADD CONSTRAINT "Part_messageId_fkey" FOREIGN KEY ("messageId") REFERENCES "Message"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ScheduleTemplates" ADD CONSTRAINT "ScheduleTemplates_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Reminder" ADD CONSTRAINT "Reminder_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Schedules" ADD CONSTRAINT "Schedules_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ScheduleRuns" ADD CONSTRAINT "ScheduleRuns_scheduleId_fkey" FOREIGN KEY ("scheduleId") REFERENCES "Schedules"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Task" ADD CONSTRAINT "Task_taskListId_fkey" FOREIGN KEY ("taskListId") REFERENCES "TasksList"("id") ON DELETE CASCADE ON UPDATE CASCADE;

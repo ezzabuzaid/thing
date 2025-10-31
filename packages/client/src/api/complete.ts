@@ -1,0 +1,65 @@
+import z from 'zod';
+
+import {
+  Dispatcher,
+  type InstanceType,
+  fetchType,
+} from '../http/dispatcher.ts';
+import {
+  type Interceptor,
+  createBaseUrlInterceptor,
+  createHeadersInterceptor,
+} from '../http/interceptors.ts';
+import { buffered, chunked } from '../http/parse-response.ts';
+import {
+  type HeadersInit,
+  empty,
+  formdata,
+  json,
+  toRequest,
+  urlencoded,
+} from '../http/request.ts';
+import * as http from '../http/response.ts';
+import * as complete from '../inputs/complete.ts';
+import * as outputs from '../outputs/index.ts';
+import {
+  CursorPagination,
+  OffsetPagination,
+  Pagination,
+} from '../pagination/index.ts';
+
+export default {
+  'POST /reminders/{reminderId}/complete': {
+    schema: complete.postRemindersreminderIdcompleteSchema,
+    output: [
+      http.Ok<outputs.PostRemindersreminderIdcomplete>,
+      http.BadRequest<outputs.PostRemindersreminderIdcomplete400>,
+      http.Unauthorized<outputs.UnauthorizedErr>,
+    ],
+    toRequest(
+      input: z.input<typeof complete.postRemindersreminderIdcompleteSchema>,
+    ) {
+      return toRequest(
+        'POST /reminders/{reminderId}/complete',
+        empty(input, {
+          inputHeaders: [],
+          inputQuery: [],
+          inputBody: [],
+          inputParams: ['reminderId'],
+        }),
+      );
+    },
+    async dispatch(
+      input: z.input<typeof complete.postRemindersreminderIdcompleteSchema>,
+      options: {
+        signal?: AbortSignal;
+        interceptors: Interceptor[];
+        fetch: z.infer<typeof fetchType>;
+      },
+    ) {
+      const dispatcher = new Dispatcher(options.interceptors, options.fetch);
+      const result = await dispatcher.send(this.toRequest(input), this.output);
+      return result.data;
+    },
+  },
+};

@@ -8,6 +8,7 @@ import { authClient } from './app/auth-client.ts';
 import ChatBot from './app/routes/ChatBot.tsx';
 import Layout from './app/routes/Layout.tsx';
 import Login from './app/routes/login.tsx';
+import Marketplace from './app/routes/marketplace.tsx';
 import Schedules from './app/routes/schedules.tsx';
 import Tasks from './app/routes/tasks.tsx';
 import Thought from './app/routes/thought.tsx';
@@ -47,6 +48,10 @@ const router = createBrowserRouter([
       {
         path: '/schedules',
         Component: Schedules,
+      },
+      {
+        path: '/marketplace',
+        Component: Marketplace,
       },
       {
         path: '/timesheet',

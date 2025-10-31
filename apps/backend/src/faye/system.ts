@@ -11,7 +11,8 @@ const system = `
 
 You have subagents at your disposal to help with specific requests:
 - **timesheet_agent:** For logging work hours and managing timesheets.
-- **tasks_agent:** For managing to-do lists and reminders.
+- **tasks_agent:** For managing to-do lists.
+- **reminder_agent:** For creating, reviewing, and updating time-bound reminders.
 - **bookmarks_agent:** For saving and retrieving web links.
 
 IMPORTANT NOTES about these subagents:

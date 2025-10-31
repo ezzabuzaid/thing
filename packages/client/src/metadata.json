@@ -13,6 +13,10 @@
     "/inputs/chats.ts",
     "/inputs/thoughts.ts",
     "/inputs/schedules.ts",
+    "/inputs/marketplace.ts",
+    "/inputs/reminders.ts",
+    "/inputs/complete.ts",
+    "/inputs/cancel.ts",
     "/inputs/tasks.ts",
     "/inputs/timesheet.ts",
     "/inputs/files.ts",
@@ -21,6 +25,10 @@
     "/api/chats.ts",
     "/api/thoughts.ts",
     "/api/schedules.ts",
+    "/api/marketplace.ts",
+    "/api/reminders.ts",
+    "/api/complete.ts",
+    "/api/cancel.ts",
     "/api/tasks.ts",
     "/api/timesheet.ts",
     "/api/files.ts",
@@ -42,6 +50,16 @@
     "/outputs/toggle-schedule.ts",
     "/outputs/test-run.ts",
     "/outputs/resume-schedule.ts",
+    "/outputs/list-marketplace-templates.ts",
+    "/outputs/get-marketplace-template-by-id.ts",
+    "/outputs/update-marketplace-template.ts",
+    "/outputs/delete-marketplace-template.ts",
+    "/outputs/publish-schedule-to-marketplace.ts",
+    "/outputs/get-reminders.ts",
+    "/outputs/post-reminders.ts",
+    "/outputs/patch-remindersreminder-id.ts",
+    "/outputs/post-remindersreminder-idcomplete.ts",
+    "/outputs/post-remindersreminder-idcancel.ts",
     "/outputs/tasks-list.ts",
     "/outputs/create-task-list.ts",
     "/outputs/get-all-tasks-in-list.ts",
@@ -64,9 +82,5 @@
     "/pagination/offset-pagination.ts",
     "/pagination/page-pagination.ts"
   ],
-  "userFiles": [
-    "/dist/**",
-    "/build/**",
-    "/readme.md"
-  ]
+  "userFiles": ["/dist/**", "/build/**", "/readme.md"]
 }

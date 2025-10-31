@@ -7,9 +7,11 @@ model User {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @default(now()) @updatedAt
   isAnonymous   Boolean?
-  sessions      Session[]
-  accounts      Account[]
-  schedules     Schedules[]
+  sessions           Session[]
+  accounts           Account[]
+  schedules          Schedules[]
+  reminders          Reminder[]
+  scheduleTemplates  ScheduleTemplates[]
 
   @@unique([email])
   @@map("user")

@@ -1,0 +1,35 @@
+name: Deploy To fly.io
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  run_migrations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Drift guard
+        run: npx prisma migrate diff --from-url "$CONNECTION_STRING" --to-schema-datamodel packages/persistence/db/ --exit-code
+        env:
+          CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
+
+      - name: Deploy migrations
+        run: npx -y prisma migrate deploy --schema packages/persistence/db/
+        env:
+          CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
+
+  deploy_to_fly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --app ${{ secrets.FLY_APP_NAME }} --dockerfile Dockerfile.fullstack --remote-only -c fly.toml
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

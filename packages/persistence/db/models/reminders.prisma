@@ -1,0 +1,26 @@
+model Reminder {
+    id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+    title     String
+    notes     String?  @db.Text
+    remindAt  DateTime
+    status    String   @default("scheduled")
+    source    String?  @db.Text
+    completedAt DateTime?
+    cancelledAt DateTime?
+
+    // References
+    userId String
+
+    // Audit
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    deletedAt DateTime?
+
+    // Relations
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    // Constraints
+    @@index([userId])
+    @@index([status])
+    @@index([remindAt])
+}

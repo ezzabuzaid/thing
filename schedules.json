@@ -1,0 +1,74 @@
+[
+  {
+    "id": "019a206c-1015-7308-a064-87b7bcffb68b",
+    "userId": "Qx0NYIpvm67KoDXhlvcO9eW1WSRh5ezU",
+    "title": "Weekely submissions",
+    "instructions": "Go over the database and check if we have unattuneed to submisisons.",
+    "cron": "0 13 * * *",
+    "updatedAt": "2025-10-30 08:20:02.352",
+    "enabled": false,
+    "runnerId": "scd_79GZNERTjZK244BUpbqFNtocDtmQ",
+    "deletedAt": "2025-10-30 08:20:02.350",
+    "connectors": "[]"
+  },
+  {
+    "id": "019a24f9-74d6-76a1-969f-6009e885d3a9",
+    "userId": "Qx0NYIpvm67KoDXhlvcO9eW1WSRh5ezU",
+    "title": "new products",
+    "instructions": "s",
+    "cron": "0 9 * * *",
+    "updatedAt": "2025-10-30 08:21:43.856",
+    "enabled": false,
+    "runnerId": "scd_68RfuFWJx4eS5UQJmEa5YaTRaoi2",
+    "deletedAt": "2025-10-30 08:21:43.856",
+    "connectors": "[]"
+  },
+  {
+    "id": "019a16bd-1c5b-7338-a511-c6b64ecd382a",
+    "userId": "Qx0NYIpvm67KoDXhlvcO9eW1WSRh5ezU",
+    "title": "Developer products funded",
+    "instructions": "List all tech products focusing on developers that received funding in the past week. For each product, include the product name, a brief description, the funding amount, the funding round (e.g., seed, Series A), the lead investors, and the source of the information. Focus only on verifiable tech products in areas like software development tools, platforms for developers, AI for coding, or similar developer-focused technologies. If no such products exist, state that clearly. Use reliable sources like TechCrunch, Crunchbase, or recent news articles to ensure accuracy.",
+    "cron": "0 9 * * *",
+    "updatedAt": "2025-10-26 12:25:19.071",
+    "enabled": true,
+    "runnerId": "scd_7hycnZjWoCbMpDb1cBGerLH7XT6k",
+    "deletedAt": null,
+    "connectors": "[]"
+  },
+  {
+    "id": "019a29f9-04f6-7061-9af5-33a9dc3e33e9",
+    "userId": "Qx0NYIpvm67KoDXhlvcO9eW1WSRh5ezU",
+    "title": "Developer Tools Funding Digest",
+    "instructions": "As a technology analyst, display a list of newly developed developer tools (not consumer products) that have received investment funding within the past week. Format the output as a structured table with the following columns: Tool Name, Tool Website, Funding announcement link, Description, Funding Amount, Investor(s), and Date of Investment.",
+    "cron": "0 9 * * 1",
+    "updatedAt": "2025-10-28 08:39:37.333",
+    "enabled": true,
+    "runnerId": "scd_6G2bkMD5QhufannoE2XZYVs2fsBV",
+    "deletedAt": null,
+    "connectors": "[]"
+  },
+  {
+    "id": "019a2f82-e48e-709e-ba6a-042a8a831345",
+    "userId": "Qx0NYIpvm67KoDXhlvcO9eW1WSRh5ezU",
+    "title": "HN cofounder prospecting for sdk-it",
+    "instructions": "Goal:\nScan Hacker News weekly to find builders working on developer tools (SDKs, runtimes, integrations, AI-for-coding) who are explicitly open to cofounding or collaboration and fit a Middle Eastern/MENA profile for sdk-it.\n\nTimeframe:\n- Consider posts and top comments from the last 7 days only.\n\nScope:\n- Sources: Hacker News threads (front page, new, show, and jobs), plus linked personal sites or GitHub from those threads for verification.\n- Focus areas: SDKs for integrations, developer runtimes, tool contracts/guardrails, agent-safe execution, deterministic builds, test harnesses, observability for LLM-powered dev tools, platforms that target developers.\n\nFilters (must satisfy all):\n- Authored by an individual (not purely company PR).\n- Signals willingness to cofound, partner, or join early-stage.\n- Developer-tools orientation (tools for developers, not consumer apps).\n- Verifiable: include an HN link and at least one corroborating link (personal site, GitHub, or reputable article).\n\nMiddle Eastern fit (preferred, not mandatory if strong fit):\n- Mentions location or background in MENA (e.g., Jordan, Egypt, UAE, KSA, Lebanon, Morocco, Tunisia, Palestine, Iraq).\n- Or Arabic name/email/LinkedIn indicating likely MENA origin.\n- Or time zone/location hints on linked pages.\n\nExtraction:\nFor each candidate, summarize in one paragraph why their work aligns with sdk-it’s mission: building an SDK + runtime for fast, reliable API integrations with strong guardrails, deterministic execution, and great DX.\n\nOutput (JSON array):\n[\n  {\n    \"hn_title\": \"...\",\n    \"hn_url\": \"...\",\n    \"author_handle\": \"...\",\n    \"summary\": \"One-paragraph synthesis of what they’re building and why it aligns with sdk-it.\",\n    \"fit_reason\": \"Explicit tie to sdk-it: SDK/runtime, integrations, agent-safe tools, deterministic builds, test harnesses, developer DX.\",\n    \"collab_signal\": \"Quote or paraphrase indicating cofounder/partner openness.\",\n    \"location_signal\": \"Any MENA indicator (explicit city/country, language, timezone).\",\n    \"verification_links\": [\"https://...\", \"https://...\"],\n    \"contact\": {\n      \"email_or_dm\": \"...\",\n      \"preferred_channel\": \"...\"\n    },\n    \"tags\": [\"sdk\", \"runtime\", \"ai-for-coding\", \"observability\", \"devtools\"]\n  }\n]\n\nRanking:\n1) Strong sdk-it fit + clear collab signal + MENA indicator.\n2) Strong sdk-it fit + clear collab signal (no MENA indicator).\n3) Medium fit + clear collab signal.\n\nNotes:\n- Exclude generic job listings without collaboration/cofounder intent.\n- Exclude non-developer products.",
+    "cron": "0 10 * * 0",
+    "updatedAt": "2025-10-29 10:28:19.079",
+    "enabled": true,
+    "runnerId": "scd_5M4cj3fWFAN7LsPxxnx61NCEsCDf",
+    "deletedAt": null,
+    "connectors": "[]"
+  },
+  {
+    "id": "019a1c3f-1904-70f0-aba3-90406610a395",
+    "userId": "Qx0NYIpvm67KoDXhlvcO9eW1WSRh5ezU",
+    "title": "Jordan Net Worth Tracker",
+    "instructions": "### 🧮 Personal Net Worth Tracker — Jordan Edition (JOD)\n\nYou are my personal net worth tracker. Follow all rules exactly.\n\n#### Actions (Checklist)\n- Fetch and use live local data for gold (Jordanian Jewelers Syndicate), crypto (BTC→JOD), and stocks (ASE).\n- Keep time deposits, cash, and real estate static unless I update them.\n- Compute melt values for gold by purity (22k, 24k) using Jordan buy prices per gram.\n- Sum total assets, subtract liabilities, and produce a timestamped net worth in JOD.\n- Validate each fetched/derived number in 1–2 lines; self-correct or state “Data unavailable” if needed.\n- Output the table exactly as specified and include DIA citations after the proposals (never inside the table text).\n\n#### Context\n- I live in Amman, Jordan. All values in JOD.\n- Use Amman local time for timestamps (+03:00).\n- Prioritize Jordanian sources: Jordanian Jewelers Syndicate (JJSJO), local exchanges, Central Bank of Jordan, Amman Stock Exchange (ASE).\n- If JJSJO doesn’t list 22k explicitly, purity-scale from 24k: 22/24.\n\n#### My Assets & Liabilities (Static unless I update)\n- Time Deposits:\n  - Safwa (ends 2025-12-31): 18,000 JOD\n  - Safwa (ends 2026-04-30): 10,000 JOD\n- Cash:\n  - Wallet: 56,000 JOD\n- Gold:\n  - 8 × English Sovereign coins (22k, 7.988g each): live melt at Jordan’s buy price/gram (22k)\n  - 2 × Swiss bars (24k, 30g each): live melt at Jordan’s buy price/gram (24k)\n- Crypto: — (fetch live BTC→JOD; 0 if none/ticker not provided)\n- Stocks: — (fetch live ASE data if tickers provided; else 0)\n- Real Estate: — (None yet; static)\n- Liabilities: — (Subtract from assets; 0 if none)\n\n#### Rules\n1) Fetch live prices for:\n   - Gold: Jordanian Jewelers Syndicate buy prices (per gram), local (not international spot).\n   - Crypto: BTC→JOD from a reputable exchange/converter with JOD quoting (e.g., Coinbase, XE). Set to 0 if I provide no wallet/tickers.\n   - Stocks: ASE live/last close; set to 0 if I provide no tickers.\n2) Keep time deposits, cash, real estate static unless updated.\n3) Subtract liabilities from total assets.\n4) Output a Markdown table with columns:\n   - Category | Item | Details | Value (JOD) | Data Source or Method | Calculation Note\n5) Show all rows even with zero value; if none held, set Details: “None owned” or “None provided.”\n6) For Crypto and Stocks, use my tickers/wallets; otherwise: Value 0, Details: “None provided.”\n7) Use today’s local Jordan gold rates (Jordanian Jewelers Syndicate). If 22k missing, scale from 24k (22/24). Prefer buy price per gram.\n8) Rounding:\n   - Round JOD values to nearest integer (no decimals), except assets below 1 JOD (show two decimals).\n9) Include calculation timestamp in Amman time, e.g., “As of YYYY-MM-DD HH:mm (+03:00 Amman).”\n10) Add a summary sentence:\n   - “Your current net worth ≈ [net worth, rounded in k JOD] as of [date & time, Amman].”\n11) If a data source is missing or ambiguous, state it clearly in Calculation Note and use the best estimate.\n12) After every fetch or calculation step, add a 1–2 line validation note.\n13) Include DIA citations for any external sources provided via search-results, appended after the table and summary (NEVER inside the table text).\n\n#### Output Format (produce exactly)\n- Line 1: Timestamp line: “As of YYYY-MM-DD HH:mm (+03:00 Amman)”\n- Then the Markdown table with all rows:\n  - Time Deposits (both Safwa lines)\n  - Cash (Wallet)\n  - Gold (sovereigns 22k; Swiss bars 24k)\n  - Crypto\n  - Stocks\n  - Real Estate\n  - Liabilities\n  - Total Assets\n  - Total Liabilities\n  - Net Worth\n- Insert brief 1–2 line validation notes immediately before the table for each fetched/derived category (gold, crypto, stocks).\n- After the table:\n  - Summary sentence: “Your current net worth ≈ [net worth, rounded in k JOD] as of [date & time, Amman].”\n  - “Sources:” list with DIA citations for each external data element used.\n\n#### Calculation Notes (Gold examples)\n- 22k sovereignty melt: grams = 8 × 7.988; price/gram(22k) = JJSJO 24k buy × (22/24) if 22k not listed.\n- 24k bars melt: grams = 2 × 30; price/gram(24k) = JJSJO 24k buy.\n\n#### Fallbacks\n- If JJSJO unreachable, use another Jordan-local gold tracker and note the deviation.\n- If crypto/stocks feeds fail and no positions provided, set values to 0 with “Data unavailable” note.\n- Always show the row even if 0.\n\n#### Example (structure only; values must be live)\nAs of 2025-10-30 11:52 (+03:00 Amman)\n\nValidation — Gold: JJSJO buy 24k: [value]; 22k derived: 24k × (22/24). If 22k listed, use directly.\nValidation — Crypto: No tickers/addresses provided; set to 0.\nValidation — Stocks: No tickers provided; set to 0.\n\n| Category      | Item                                      | Details                                  | Value (JOD) | Data Source or Method              | Calculation Note                              |\n|---------------|--------------------------------------------|------------------------------------------|-------------|------------------------------------|-----------------------------------------------|\n| Time Deposits | Safwa (ends 2025-12-31)                    | Principal                                | [int]       | User input                         | Static principal.                              |\n| Time Deposits | Safwa (ends 2026-04-30)                    | Principal                                | [int]       | User input                         | Static principal.                              |\n| Cash          | Wallet                                     | N/A                                      | [int]       | User input                         | Static.                                        |\n| Gold          | 8 × English Sovereign coins (22k, 7.988g)  | Live melt — buy price/gram (22k)         | [int]       | JJSJO (Jordan Jewelers Syndicate)  | 63.904g × price/gram(22k).                    |\n| Gold          | 2 × Swiss bars (24k, 30g each)             | Live melt — buy price/gram (24k)         | [int]       | JJSJO                               | 60g × price/gram(24k).                         |\n| Crypto        | —                                          | None provided                            | 0           | —                                  | None provided.                                 |\n| Stocks        | —                                          | None provided                            | 0           | —                                  | None provided.                                 |\n| Real Estate   | —                                          | None owned                               | 0           | —                                  | Static (none yet).                             |\n| Liabilities   | —                                          | None outstanding                         | 0           | —                                  | Subtracted from assets.                        |\n| **Total Assets** |                                          |                                          | [int]       | —                                  | Sum of assets.                                 |\n| **Total Liabilities** |                                     |                                          | 0           | —                                  | Sum of liabilities.                            |\n| **Net Worth** |                                            |                                          | [int]       | —                                  | Assets − Liabilities.                          |\n\nYour current net worth ≈ [rounded in k JOD] as of [date & time, Amman].\n\nSources:\n- Jordanian Jewelers Syndicate local gold prices. [${DIA-SOURCE}](jjsjo.com/1s)\n- BTC→JOD live converter (if used). [${DIA-SOURCE}](xe.com/1z)\n- ASE site for stocks (if tickers provided). [${DIA-SOURCE}](ase.com.jo/1y)",
+    "cron": "0 9 * * *",
+    "updatedAt": "2025-10-30 08:58:12.253",
+    "enabled": true,
+    "runnerId": "scd_67azx8UNQ9zVyzsukiEy6AJgMEjs",
+    "deletedAt": null,
+    "connectors": "[\"web search\"]"
+  }
+]

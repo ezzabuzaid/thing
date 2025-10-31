@@ -1,5 +1,5 @@
 import { groq } from '@ai-sdk/groq';
-import { type Agent, agent } from '@deepagents/agent';
+import { type Agent, agent, toState } from '@deepagents/agent';
 import { type Prisma, prisma } from '@thing/db';
 import { tool } from 'ai';
 import z from 'zod';
@@ -29,8 +29,10 @@ export const tasksAgent: Agent = agent({
     getTaskLists: tool({
       description: 'List available task lists.',
       inputSchema: z.object({}),
-      execute: async () => {
+      execute: async (_input, options) => {
+        const state = toState<{ userId: string }>(options);
         return await prisma.tasksList.findMany({
+          where: { userId: state.userId },
           select: { id: true, title: true },
           orderBy: { updatedAt: 'desc' },
         });
@@ -41,10 +43,12 @@ export const tasksAgent: Agent = agent({
       inputSchema: z.object({
         taskListId: z.string(),
       }),
-      execute: async (input) => {
+      execute: async (input, options) => {
+        const state = toState<{ userId: string }>(options);
         return prisma.task.findMany({
           where: {
             taskListId: input.taskListId,
+            taskList: { userId: state.userId },
             deletedAt: null,
             status: { not: 'completed' },
           },
@@ -68,7 +72,8 @@ export const tasksAgent: Agent = agent({
         taskListId: z.string().optional(),
         includeCompleted: z.boolean().optional().default(false),
       }),
-      execute: async (input) => {
+      execute: async (input, options) => {
+        const state = toState<{ userId: string }>(options);
         const matchTasks: Prisma.TaskWhereInput[] = input.keywords.flatMap(
           (k) => [
             { title: { contains: k, mode: 'insensitive' } },
@@ -83,6 +88,7 @@ export const tasksAgent: Agent = agent({
 
         const taskBaseWhere: Prisma.TaskWhereInput = {
           deletedAt: null,
+          taskList: { userId: state.userId },
           ...(input.taskListId ? { taskListId: input.taskListId } : {}),
           ...(!input.includeCompleted ? { status: { not: 'completed' } } : {}),
         };
@@ -108,6 +114,7 @@ export const tasksAgent: Agent = agent({
         const [taskLists, tasks] = await Promise.all([
           prisma.tasksList.findMany({
             where: {
+              userId: state.userId,
               ...(input.taskListId ? { id: input.taskListId } : {}),
               OR: input.keywords.map((k) => ({
                 title: { contains: k, mode: 'insensitive' },
@@ -127,6 +134,7 @@ export const tasksAgent: Agent = agent({
               subtasks: {
                 where: {
                   deletedAt: null,
+                  task: { taskList: { userId: state.userId } },
                   ...(!input.includeCompleted
                     ? { status: { not: 'completed' as const } }
                     : {}),
@@ -154,10 +162,11 @@ export const tasksAgent: Agent = agent({
         due: z.string().datetime().optional().describe('ISO datetime string'),
         taskListId: z.string().min(1),
       }),
-      execute: async (input) => {
+      execute: async (input, options) => {
+        const state = toState<{ userId: string }>(options);
         // Ensure the provided list exists
-        const list = await prisma.tasksList.findUniqueOrThrow({
-          where: { id: input.taskListId },
+        const list = await prisma.tasksList.findFirstOrThrow({
+          where: { id: input.taskListId, userId: state.userId },
           select: { id: true },
         });
 
@@ -185,9 +194,14 @@ export const tasksAgent: Agent = agent({
         notes: z.string().optional(),
         due: z.string().datetime().optional().describe('ISO datetime string'),
       }),
-      execute: async (input) => {
-        const parent = await prisma.task.findUniqueOrThrow({
-          where: { id: input.taskId, deletedAt: null },
+      execute: async (input, options) => {
+        const state = toState<{ userId: string }>(options);
+        const parent = await prisma.task.findFirstOrThrow({
+          where: {
+            id: input.taskId,
+            deletedAt: null,
+            taskList: { userId: state.userId },
+          },
           select: { id: true },
         });
 

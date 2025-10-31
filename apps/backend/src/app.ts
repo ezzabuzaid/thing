@@ -21,6 +21,7 @@ import { timing } from 'hono/timing';
 
 import { faye } from './faye/faye.ts';
 import { auth } from './middlewares/auth.ts';
+import { authenticate } from './middlewares/middleware.ts';
 
 const app = new Hono().use(
   logger(),
@@ -37,18 +38,11 @@ const app = new Hono().use(
 app.on(['POST', 'GET'], '/api/auth/*', (c) => {
   return auth.handler(c.req.raw);
 });
+
 app.get('/health', async (c) => {
   await prisma.$queryRaw`SELECT 1`;
   return c.json({ status: 'ok' });
 });
-
-app.use(
-  '/openapi.json',
-  serveStatic({
-    path: './openapi.json',
-    rewriteRequestPath: () => '/openapi.json',
-  }),
-);
 
 export interface Metadata {
   type: string;
@@ -199,13 +193,12 @@ async function storeMessages(
   }
 }
 
-app.post('/chat', async (c) => {
+app.post('/chat', authenticate(), async (c) => {
   const { id: chatId, messages } = await c.req.json();
-
   const result = execute(
     faye,
     messages,
-    {},
+    { userId: c.var.subject.id },
     {
       abortSignal: c.req.raw.signal,
     },
@@ -259,6 +252,8 @@ for await (const route of [
   import('./routes/chats.route.ts'),
   import('./routes/thoughts.route.ts'),
   import('./routes/schedules.route.ts'),
+  import('./routes/marketplace.route.ts'),
+  import('./routes/reminders.route.ts'),
   import('./routes/tasks.route.ts'),
   import('./routes/timesheet.route.ts'),
 ]) {
