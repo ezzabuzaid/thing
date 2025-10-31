@@ -256,6 +256,7 @@ for await (const route of [
   import('./routes/reminders.route.ts'),
   import('./routes/tasks.route.ts'),
   import('./routes/timesheet.route.ts'),
+  import('./routes/ui.route.ts'),
 ]) {
   route.default(app);
 }
