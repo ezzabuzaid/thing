@@ -58,6 +58,42 @@ CREATE TABLE "verification" (
 );
 
 -- CreateTable
+CREATE TABLE "Thought" (
+    "id" UUID NOT NULL,
+    "userId" TEXT NOT NULL,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Thought_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "BookmarkFolder" (
+    "id" UUID NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "color" TEXT,
+    "userId" TEXT NOT NULL,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "BookmarkFolder_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Bookmark" (
+    "id" UUID NOT NULL,
+    "url" TEXT NOT NULL,
+    "title" TEXT,
+    "description" TEXT,
+    "image" TEXT,
+    "favicon" TEXT,
+    "publishedAt" TEXT,
+    "userContext" TEXT,
+    "folderId" UUID NOT NULL,
+
+    CONSTRAINT "Bookmark_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Chat" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
@@ -113,7 +149,7 @@ CREATE TABLE "Part" (
 
 -- CreateTable
 CREATE TABLE "CommandPalette" (
-    "id" UUID NOT NULL DEFAULT uuidv7(),
+    "id" UUID NOT NULL,
     "userId" TEXT NOT NULL,
     "projectId" TEXT NOT NULL,
     "label" TEXT NOT NULL,
@@ -127,7 +163,7 @@ CREATE TABLE "CommandPalette" (
 
 -- CreateTable
 CREATE TABLE "ScheduleTemplates" (
-    "id" UUID NOT NULL DEFAULT uuidv7(),
+    "id" UUID NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "instructions" TEXT NOT NULL,
@@ -135,7 +171,6 @@ CREATE TABLE "ScheduleTemplates" (
     "connectors" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "isOfficial" BOOLEAN NOT NULL DEFAULT false,
     "published" BOOLEAN NOT NULL DEFAULT true,
-    "category" TEXT NOT NULL,
     "tags" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "installCount" INTEGER NOT NULL DEFAULT 0,
     "viewCount" INTEGER NOT NULL DEFAULT 0,
@@ -149,7 +184,7 @@ CREATE TABLE "ScheduleTemplates" (
 
 -- CreateTable
 CREATE TABLE "Media" (
-    "id" UUID NOT NULL DEFAULT uuidv7(),
+    "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "path" TEXT NOT NULL,
     "contentType" TEXT NOT NULL,
@@ -162,7 +197,7 @@ CREATE TABLE "Media" (
 
 -- CreateTable
 CREATE TABLE "Reminder" (
-    "id" UUID NOT NULL DEFAULT uuidv7(),
+    "id" UUID NOT NULL,
     "title" TEXT NOT NULL,
     "notes" TEXT,
     "remindAt" TIMESTAMP(3) NOT NULL,
@@ -180,7 +215,7 @@ CREATE TABLE "Reminder" (
 
 -- CreateTable
 CREATE TABLE "Schedules" (
-    "id" UUID NOT NULL DEFAULT uuidv7(),
+    "id" UUID NOT NULL,
     "title" TEXT NOT NULL,
     "instructions" TEXT NOT NULL,
     "cron" TEXT NOT NULL,
@@ -196,7 +231,7 @@ CREATE TABLE "Schedules" (
 
 -- CreateTable
 CREATE TABLE "ScheduleRuns" (
-    "id" UUID NOT NULL DEFAULT uuidv7(),
+    "id" UUID NOT NULL,
     "title" TEXT,
     "result" TEXT,
     "scheduleId" UUID NOT NULL,
@@ -208,7 +243,7 @@ CREATE TABLE "ScheduleRuns" (
 
 -- CreateTable
 CREATE TABLE "TasksList" (
-    "id" UUID NOT NULL DEFAULT uuidv7(),
+    "id" UUID NOT NULL,
     "title" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -218,7 +253,7 @@ CREATE TABLE "TasksList" (
 
 -- CreateTable
 CREATE TABLE "Task" (
-    "id" UUID NOT NULL DEFAULT uuidv7(),
+    "id" UUID NOT NULL,
     "title" TEXT NOT NULL,
     "notes" TEXT,
     "status" TEXT NOT NULL DEFAULT 'needsAction',
@@ -232,7 +267,7 @@ CREATE TABLE "Task" (
 
 -- CreateTable
 CREATE TABLE "Subtask" (
-    "id" UUID NOT NULL DEFAULT uuidv7(),
+    "id" UUID NOT NULL,
     "title" TEXT NOT NULL,
     "notes" TEXT,
     "status" TEXT NOT NULL DEFAULT 'needsAction',
@@ -247,7 +282,7 @@ CREATE TABLE "Subtask" (
 
 -- CreateTable
 CREATE TABLE "TaskMedia" (
-    "id" UUID NOT NULL DEFAULT uuidv7(),
+    "id" UUID NOT NULL,
     "mediaId" UUID NOT NULL,
     "taskId" UUID NOT NULL,
 
@@ -256,7 +291,7 @@ CREATE TABLE "TaskMedia" (
 
 -- CreateTable
 CREATE TABLE "SubtaskMedia" (
-    "id" UUID NOT NULL DEFAULT uuidv7(),
+    "id" UUID NOT NULL,
     "mediaId" UUID NOT NULL,
     "subtaskId" UUID NOT NULL,
 
@@ -264,43 +299,10 @@ CREATE TABLE "SubtaskMedia" (
 );
 
 -- CreateTable
-CREATE TABLE "Thought" (
-    "id" UUID NOT NULL DEFAULT uuidv7(),
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "Thought_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "BookmarkFolder" (
-    "id" UUID NOT NULL DEFAULT uuidv7(),
-    "name" TEXT NOT NULL,
-    "description" TEXT,
-    "color" TEXT,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "BookmarkFolder_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Bookmark" (
-    "id" UUID NOT NULL,
-    "url" TEXT NOT NULL,
-    "title" TEXT,
-    "description" TEXT,
-    "image" TEXT,
-    "favicon" TEXT,
-    "publishedAt" TEXT,
-    "userContext" TEXT,
-    "folderId" UUID NOT NULL,
-
-    CONSTRAINT "Bookmark_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "Client" (
-    "id" UUID NOT NULL DEFAULT uuidv7(),
+    "id" UUID NOT NULL,
     "name" VARCHAR(160) NOT NULL,
+    "userId" TEXT NOT NULL,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Client_pkey" PRIMARY KEY ("id")
@@ -308,9 +310,10 @@ CREATE TABLE "Client" (
 
 -- CreateTable
 CREATE TABLE "Project" (
-    "id" UUID NOT NULL DEFAULT uuidv7(),
-    "clientId" UUID NOT NULL,
+    "id" UUID NOT NULL,
     "name" VARCHAR(160) NOT NULL,
+    "clientId" UUID NOT NULL,
+    "userId" TEXT NOT NULL,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Project_pkey" PRIMARY KEY ("id")
@@ -318,14 +321,15 @@ CREATE TABLE "Project" (
 
 -- CreateTable
 CREATE TABLE "HourEntry" (
-    "id" UUID NOT NULL DEFAULT uuidv7(),
-    "projectId" UUID NOT NULL,
+    "id" UUID NOT NULL,
     "date" TIMESTAMP(3) NOT NULL,
     "hours" TEXT NOT NULL,
     "billable" BOOLEAN NOT NULL DEFAULT true,
     "note" TEXT,
     "currency" TEXT DEFAULT 'USD',
     "hourlyRate" TEXT NOT NULL,
+    "projectId" UUID NOT NULL,
+    "userId" TEXT NOT NULL,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "HourEntry_pkey" PRIMARY KEY ("id")
@@ -338,10 +342,16 @@ CREATE UNIQUE INDEX "user_email_key" ON "user"("email");
 CREATE UNIQUE INDEX "session_token_key" ON "session"("token");
 
 -- CreateIndex
-CREATE INDEX "ScheduleTemplates_authorId_idx" ON "ScheduleTemplates"("authorId");
+CREATE INDEX "Thought_userId_idx" ON "Thought"("userId");
 
 -- CreateIndex
-CREATE INDEX "ScheduleTemplates_category_idx" ON "ScheduleTemplates"("category");
+CREATE INDEX "BookmarkFolder_userId_idx" ON "BookmarkFolder"("userId");
+
+-- CreateIndex
+CREATE INDEX "Bookmark_folderId_idx" ON "Bookmark"("folderId");
+
+-- CreateIndex
+CREATE INDEX "ScheduleTemplates_authorId_idx" ON "ScheduleTemplates"("authorId");
 
 -- CreateIndex
 CREATE INDEX "ScheduleTemplates_published_idx" ON "ScheduleTemplates"("published");
@@ -389,16 +399,22 @@ CREATE INDEX "Subtask_status_idx" ON "Subtask"("status");
 CREATE INDEX "Subtask_due_idx" ON "Subtask"("due");
 
 -- CreateIndex
-CREATE INDEX "Bookmark_folderId_idx" ON "Bookmark"("folderId");
+CREATE INDEX "Client_userId_idx" ON "Client"("userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Client_name_key" ON "Client"("name");
+CREATE UNIQUE INDEX "Client_userId_name_key" ON "Client"("userId", "name");
 
 -- CreateIndex
 CREATE INDEX "Project_clientId_idx" ON "Project"("clientId");
 
 -- CreateIndex
+CREATE INDEX "Project_userId_idx" ON "Project"("userId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Project_clientId_name_key" ON "Project"("clientId", "name");
+
+-- CreateIndex
+CREATE INDEX "HourEntry_userId_idx" ON "HourEntry"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "uniq_entry_hint" ON "HourEntry"("projectId", "date", "note");
@@ -408,6 +424,12 @@ ALTER TABLE "session" ADD CONSTRAINT "session_userId_fkey" FOREIGN KEY ("userId"
 
 -- AddForeignKey
 ALTER TABLE "account" ADD CONSTRAINT "account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Bookmark" ADD CONSTRAINT "Bookmark_id_fkey" FOREIGN KEY ("id") REFERENCES "Thought"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Bookmark" ADD CONSTRAINT "Bookmark_folderId_fkey" FOREIGN KEY ("folderId") REFERENCES "BookmarkFolder"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Message" ADD CONSTRAINT "Message_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES "Chat"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -444,12 +466,6 @@ ALTER TABLE "SubtaskMedia" ADD CONSTRAINT "SubtaskMedia_subtaskId_fkey" FOREIGN 
 
 -- AddForeignKey
 ALTER TABLE "SubtaskMedia" ADD CONSTRAINT "SubtaskMedia_mediaId_fkey" FOREIGN KEY ("mediaId") REFERENCES "Media"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Bookmark" ADD CONSTRAINT "Bookmark_id_fkey" FOREIGN KEY ("id") REFERENCES "Thought"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Bookmark" ADD CONSTRAINT "Bookmark_folderId_fkey" FOREIGN KEY ("folderId") REFERENCES "BookmarkFolder"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Project" ADD CONSTRAINT "Project_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -1,15 +1,15 @@
 services:
   database:
-    image: postgres:18
+    image: postgres:17
     ports:
       - '5432:5432'
     environment:
       POSTGRES_PASSWORD: 'yourpassword'
       POSTGRES_USER: 'youruser'
       POSTGRES_DB: 'march'
-      PGDATA: /var/lib/postgresql/18/data
+      PGDATA: /var/lib/postgresql/17/data
     volumes:
-      - pgdata18:/var/lib/postgresql
+      - pgdata17:/var/lib/postgresql
     healthcheck:
       test: ['CMD', 'pg_isready', '-U', 'youruser', '-d', 'march']
     networks:
@@ -36,4 +36,4 @@ networks:
   app_network:
 
 volumes:
-  pgdata18: {}
+  pgdata17: {}

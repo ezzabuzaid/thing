@@ -1,9 +1,8 @@
-
 model Chat {
-  id        String    @id
-  userId    String
-  title     String?
-  messages  Message[]
+  id       String    @id
+  userId   String
+  title    String?
+  messages Message[]
 }
 
 model Message {
@@ -21,7 +20,7 @@ model Message {
   finishReason      String?
 
   // Audit
-  traceId   String? // OTEL trace correlation
+  traceId String? // OTEL trace correlation
 
   // Relations
   chat  Chat   @relation(fields: [chatId], references: [id])
@@ -71,7 +70,7 @@ model Part {
 }
 
 model CommandPalette {
-  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  id        String   @id @default(uuid(7)) @db.Uuid
   userId    String
   projectId String
   label     String

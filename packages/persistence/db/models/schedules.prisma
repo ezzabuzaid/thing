@@ -1,5 +1,5 @@
 model Schedules {
-  id           String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  id           String   @id @default(uuid(7)) @db.Uuid
   title        String
   instructions String
   cron         String
@@ -23,7 +23,7 @@ model Schedules {
 }
 
 model ScheduleRuns {
-  id     String  @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  id     String  @id @default(uuid(7)) @db.Uuid
   title  String?
   result String?
 

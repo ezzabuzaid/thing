@@ -1,5 +1,5 @@
 model TasksList {
-    id    String @id @default(dbgenerated("uuidv7()")) @db.Uuid
+    id    String @id @default(uuid(7)) @db.Uuid
     title String @unique
 
     // References
@@ -16,7 +16,7 @@ model TasksList {
 }
 
 model Task {
-    id String @id @default(dbgenerated("uuidv7()")) @db.Uuid
+    id String @id @default(uuid(7)) @db.Uuid
 
     title String
 
@@ -43,7 +43,7 @@ model Task {
 }
 
 model Subtask {
-    id String @id @default(dbgenerated("uuidv7()")) @db.Uuid
+    id String @id @default(uuid(7)) @db.Uuid
 
     title String
 
@@ -55,7 +55,7 @@ model Subtask {
     taskId String @db.Uuid
 
     // Relations
-    task  Task        @relation(fields: [taskId], references: [id], onDelete: Cascade)
+    task  Task           @relation(fields: [taskId], references: [id], onDelete: Cascade)
     media SubtaskMedia[]
 
     // Audit
@@ -70,18 +70,19 @@ model Subtask {
 }
 
 model TaskMedia {
-    id        String  @id @default(dbgenerated("uuidv7()")) @db.Uuid
-    mediaId   String  @db.Uuid
-    taskId    String @db.Uuid
+    id      String @id @default(uuid(7)) @db.Uuid
+    mediaId String @db.Uuid
+    taskId  String @db.Uuid
 
-    task    Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
-    media   Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+    task  Task? @relation(fields: [taskId], references: [id], onDelete: Cascade)
+    media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
 }
+
 model SubtaskMedia {
-    id        String  @id @default(dbgenerated("uuidv7()")) @db.Uuid
-    mediaId   String  @db.Uuid
+    id        String @id @default(uuid(7)) @db.Uuid
+    mediaId   String @db.Uuid
     subtaskId String @db.Uuid
 
     subtask Subtask @relation(fields: [subtaskId], references: [id], onDelete: Cascade)
-    media   Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+    media   Media   @relation(fields: [mediaId], references: [id], onDelete: Cascade)
 }

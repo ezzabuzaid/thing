@@ -59,7 +59,9 @@
             }
           }
         ],
-        "tags": ["chats"],
+        "tags": [
+          "chats"
+        ],
         "description": "Get a paginated list of chat conversations for the authenticated user. Returns chats ordered by creation date with basic metadata.",
         "responses": {
           "200": {
@@ -83,11 +85,15 @@
                                     "type": "number"
                                   }
                                 },
-                                "required": ["messages"],
+                                "required": [
+                                  "messages"
+                                ],
                                 "additionalProperties": false
                               }
                             },
-                            "required": ["_count"],
+                            "required": [
+                              "_count"
+                            ],
                             "additionalProperties": false
                           },
                           {
@@ -110,7 +116,11 @@
                                 ]
                               }
                             },
-                            "required": ["id", "userId", "title"],
+                            "required": [
+                              "id",
+                              "userId",
+                              "title"
+                            ],
                             "additionalProperties": false
                           }
                         ]
@@ -149,7 +159,10 @@
                       "additionalProperties": false
                     }
                   },
-                  "required": ["records", "pagination"],
+                  "required": [
+                    "records",
+                    "pagination"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -195,7 +208,9 @@
             }
           }
         ],
-        "tags": ["chats"],
+        "tags": [
+          "chats"
+        ],
         "description": "Get a specific chat conversation by ID. Returns the chat details along with message count.",
         "responses": {
           "200": {
@@ -440,7 +455,9 @@
                                     }
                                   }
                                 },
-                                "required": ["parts"],
+                                "required": [
+                                  "parts"
+                                ],
                                 "additionalProperties": false
                               },
                               {
@@ -555,7 +572,9 @@
                           }
                         }
                       },
-                      "required": ["messages"],
+                      "required": [
+                        "messages"
+                      ],
                       "additionalProperties": false
                     },
                     {
@@ -578,7 +597,11 @@
                           ]
                         }
                       },
-                      "required": ["id", "userId", "title"],
+                      "required": [
+                        "id",
+                        "userId",
+                        "title"
+                      ],
                       "additionalProperties": false
                     }
                   ]
@@ -624,14 +647,18 @@
             }
           }
         ],
-        "tags": ["chats"],
+        "tags": [
+          "chats"
+        ],
         "description": "Update a chat conversation's title or other metadata.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "required": ["title"],
+                "required": [
+                  "title"
+                ],
                 "type": "object",
                 "properties": {
                   "title": {
@@ -669,7 +696,11 @@
                       ]
                     }
                   },
-                  "required": ["id", "userId", "title"],
+                  "required": [
+                    "id",
+                    "userId",
+                    "title"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -713,7 +744,9 @@
             }
           }
         ],
-        "tags": ["chats"],
+        "tags": [
+          "chats"
+        ],
         "description": "Delete a chat conversation and all its associated messages.",
         "responses": {
           "204": {
@@ -767,7 +800,9 @@
             }
           }
         ],
-        "tags": ["chats"],
+        "tags": [
+          "chats"
+        ],
         "description": "Delete a specific message from a chat conversation.",
         "responses": {
           "204": {
@@ -841,7 +876,9 @@
             }
           }
         ],
-        "tags": ["thoughts"],
+        "tags": [
+          "thoughts"
+        ],
         "description": "Get a paginated list of thoughts ordered by last update time. Includes bookmark relation when present.",
         "responses": {
           "200": {
@@ -952,7 +989,9 @@
                                 ]
                               }
                             },
-                            "required": ["bookmark"],
+                            "required": [
+                              "bookmark"
+                            ],
                             "additionalProperties": false
                           },
                           {
@@ -968,7 +1007,11 @@
                                 "type": "string"
                               }
                             },
-                            "required": ["id", "userId", "updatedAt"],
+                            "required": [
+                              "id",
+                              "userId",
+                              "updatedAt"
+                            ],
                             "additionalProperties": false
                           }
                         ]
@@ -1007,7 +1050,10 @@
                       "additionalProperties": false
                     }
                   },
-                  "required": ["records", "pagination"],
+                  "required": [
+                    "records",
+                    "pagination"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -1044,7 +1090,9 @@
       "get": {
         "operationId": "listScheduleConnectors",
         "parameters": [],
-        "tags": ["schedules"],
+        "tags": [
+          "schedules"
+        ],
         "description": "List available connectors for schedules.",
         "responses": {
           "200": {
@@ -1061,7 +1109,9 @@
                       }
                     }
                   },
-                  "required": ["connectors"],
+                  "required": [
+                    "connectors"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -1098,14 +1148,20 @@
       "post": {
         "operationId": "createSchedule",
         "parameters": [],
-        "tags": ["schedules"],
+        "tags": [
+          "schedules"
+        ],
         "description": "Create a schedule and schedule it with pg-boss. Returns the created schedule.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "required": ["title", "instructions", "cron"],
+                "required": [
+                  "title",
+                  "instructions",
+                  "cron"
+                ],
                 "type": "object",
                 "properties": {
                   "title": {
@@ -1252,7 +1308,9 @@
             }
           }
         ],
-        "tags": ["schedules"],
+        "tags": [
+          "schedules"
+        ],
         "description": "List schedules for the authenticated user (paginated).",
         "responses": {
           "200": {
@@ -1356,7 +1414,10 @@
                       "additionalProperties": false
                     }
                   },
-                  "required": ["records", "pagination"],
+                  "required": [
+                    "records",
+                    "pagination"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -1403,7 +1464,9 @@
             }
           }
         ],
-        "tags": ["schedules"],
+        "tags": [
+          "schedules"
+        ],
         "description": "Get a single schedule by id if owned by the user.",
         "responses": {
           "200": {
@@ -1472,7 +1535,9 @@
                           }
                         }
                       },
-                      "required": ["runs"],
+                      "required": [
+                        "runs"
+                      ],
                       "additionalProperties": false
                     },
                     {
@@ -1577,7 +1642,9 @@
             }
           }
         ],
-        "tags": ["schedules"],
+        "tags": [
+          "schedules"
+        ],
         "description": "Update an existing schedule (title, cron, instructions, enabled).",
         "requestBody": {
           "required": false,
@@ -1715,7 +1782,9 @@
             }
           }
         ],
-        "tags": ["schedules"],
+        "tags": [
+          "schedules"
+        ],
         "description": "Archive a schedule: disables it, removes remote runner, and soft deletes it.",
         "responses": {
           "200": {
@@ -1824,7 +1893,9 @@
             }
           }
         ],
-        "tags": ["schedules"],
+        "tags": [
+          "schedules"
+        ],
         "description": "Toggle a schedule's enabled status. When disabling, the remote runner is deleted. When enabling, a new runner is scheduled.",
         "responses": {
           "200": {
@@ -1933,7 +2004,9 @@
             }
           }
         ],
-        "tags": ["schedules"],
+        "tags": [
+          "schedules"
+        ],
         "description": "Test run a schedule",
         "requestBody": {
           "required": false,
@@ -1944,7 +2017,10 @@
                 "properties": {
                   "source": {
                     "type": "string",
-                    "enum": ["user", "system"],
+                    "enum": [
+                      "user",
+                      "system"
+                    ],
                     "default": "system"
                   }
                 }
@@ -1967,7 +2043,10 @@
                       "type": "string"
                     }
                   },
-                  "required": ["result", "title"],
+                  "required": [
+                    "result",
+                    "title"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -2014,7 +2093,9 @@
             }
           }
         ],
-        "tags": ["schedules"],
+        "tags": [
+          "schedules"
+        ],
         "description": "Resume a schedule: sets enabled=true and creates a new remote runner schedule.",
         "responses": {
           "200": {
@@ -2135,7 +2216,12 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": ["featured", "trending", "installs", "newest"],
+              "enum": [
+                "featured",
+                "trending",
+                "installs",
+                "newest"
+              ],
               "default": "featured"
             }
           },
@@ -2161,7 +2247,9 @@
             }
           }
         ],
-        "tags": ["marketplace"],
+        "tags": [
+          "marketplace"
+        ],
         "description": "List marketplace templates with filtering and search.",
         "responses": {
           "200": {
@@ -2198,11 +2286,17 @@
                                     ]
                                   }
                                 },
-                                "required": ["id", "name", "image"],
+                                "required": [
+                                  "id",
+                                  "name",
+                                  "image"
+                                ],
                                 "additionalProperties": false
                               }
                             },
-                            "required": ["author"],
+                            "required": [
+                              "author"
+                            ],
                             "additionalProperties": false
                           },
                           {
@@ -2322,7 +2416,10 @@
                       "additionalProperties": false
                     }
                   },
-                  "required": ["records", "pagination"],
+                  "required": [
+                    "records",
+                    "pagination"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -2369,7 +2466,9 @@
             }
           }
         ],
-        "tags": ["marketplace"],
+        "tags": [
+          "marketplace"
+        ],
         "description": "Get a single marketplace template by ID and increment view count.",
         "responses": {
           "200": {
@@ -2401,11 +2500,17 @@
                               ]
                             }
                           },
-                          "required": ["id", "name", "image"],
+                          "required": [
+                            "id",
+                            "name",
+                            "image"
+                          ],
                           "additionalProperties": false
                         }
                       },
-                      "required": ["author"],
+                      "required": [
+                        "author"
+                      ],
                       "additionalProperties": false
                     },
                     {
@@ -2533,7 +2638,9 @@
             }
           }
         ],
-        "tags": ["marketplace"],
+        "tags": [
+          "marketplace"
+        ],
         "description": "Update a marketplace template (only by author).",
         "requestBody": {
           "required": false,
@@ -2607,11 +2714,17 @@
                               ]
                             }
                           },
-                          "required": ["id", "name", "image"],
+                          "required": [
+                            "id",
+                            "name",
+                            "image"
+                          ],
                           "additionalProperties": false
                         }
                       },
-                      "required": ["author"],
+                      "required": [
+                        "author"
+                      ],
                       "additionalProperties": false
                     },
                     {
@@ -2739,7 +2852,9 @@
             }
           }
         ],
-        "tags": ["marketplace"],
+        "tags": [
+          "marketplace"
+        ],
         "description": "Delete a marketplace template (only by author).",
         "responses": {
           "200": {
@@ -2753,7 +2868,9 @@
                       "type": "boolean"
                     }
                   },
-                  "required": ["success"],
+                  "required": [
+                    "success"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -2800,14 +2917,19 @@
             }
           }
         ],
-        "tags": ["marketplace"],
+        "tags": [
+          "marketplace"
+        ],
         "description": "Publish an existing schedule as a marketplace template.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "required": ["description", "tags"],
+                "required": [
+                  "description",
+                  "tags"
+                ],
                 "type": "object",
                 "properties": {
                   "description": {
@@ -2875,11 +2997,17 @@
                               ]
                             }
                           },
-                          "required": ["id", "name", "image"],
+                          "required": [
+                            "id",
+                            "name",
+                            "image"
+                          ],
                           "additionalProperties": false
                         }
                       },
-                      "required": ["author"],
+                      "required": [
+                        "author"
+                      ],
                       "additionalProperties": false
                     },
                     {
@@ -3023,7 +3151,10 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": ["true", "false"]
+              "enum": [
+                "true",
+                "false"
+              ]
             }
           },
           {
@@ -3032,7 +3163,10 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": ["true", "false"]
+              "enum": [
+                "true",
+                "false"
+              ]
             }
           },
           {
@@ -3153,7 +3287,10 @@
                       }
                     }
                   },
-                  "required": ["count", "reminders"],
+                  "required": [
+                    "count",
+                    "reminders"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -3194,7 +3331,10 @@
           "content": {
             "application/json": {
               "schema": {
-                "required": ["title", "remindAt"],
+                "required": [
+                  "title",
+                  "remindAt"
+                ],
                 "type": "object",
                 "properties": {
                   "title": {
@@ -3497,7 +3637,9 @@
                                 "type": "object",
                                 "properties": {
                                   "code": {
-                                    "enum": ["reminders/nothing-to-update"],
+                                    "enum": [
+                                      "reminders/nothing-to-update"
+                                    ],
                                     "type": "string"
                                   },
                                   "detail": {
@@ -3507,25 +3649,35 @@
                                     "type": "string"
                                   }
                                 },
-                                "required": ["code", "detail"],
+                                "required": [
+                                  "code",
+                                  "detail"
+                                ],
                                 "additionalProperties": false
                               }
                             },
-                            "required": ["message", "cause"],
+                            "required": [
+                              "message",
+                              "cause"
+                            ],
                             "additionalProperties": false
                           },
                           {
                             "type": "object",
                             "properties": {
                               "message": {
-                                "enum": ["Cannot update a cancelled reminder."],
+                                "enum": [
+                                  "Cannot update a cancelled reminder."
+                                ],
                                 "type": "string"
                               },
                               "cause": {
                                 "type": "object",
                                 "properties": {
                                   "code": {
-                                    "enum": ["reminders/cancelled"],
+                                    "enum": [
+                                      "reminders/cancelled"
+                                    ],
                                     "type": "string"
                                   },
                                   "detail": {
@@ -3535,25 +3687,35 @@
                                     "type": "string"
                                   }
                                 },
-                                "required": ["code", "detail"],
+                                "required": [
+                                  "code",
+                                  "detail"
+                                ],
                                 "additionalProperties": false
                               }
                             },
-                            "required": ["message", "cause"],
+                            "required": [
+                              "message",
+                              "cause"
+                            ],
                             "additionalProperties": false
                           },
                           {
                             "type": "object",
                             "properties": {
                               "message": {
-                                "enum": ["Cannot update a completed reminder."],
+                                "enum": [
+                                  "Cannot update a completed reminder."
+                                ],
                                 "type": "string"
                               },
                               "cause": {
                                 "type": "object",
                                 "properties": {
                                   "code": {
-                                    "enum": ["reminders/completed"],
+                                    "enum": [
+                                      "reminders/completed"
+                                    ],
                                     "type": "string"
                                   },
                                   "detail": {
@@ -3563,37 +3725,55 @@
                                     "type": "string"
                                   }
                                 },
-                                "required": ["code", "detail"],
+                                "required": [
+                                  "code",
+                                  "detail"
+                                ],
                                 "additionalProperties": false
                               }
                             },
-                            "required": ["message", "cause"],
+                            "required": [
+                              "message",
+                              "cause"
+                            ],
                             "additionalProperties": false
                           },
                           {
                             "type": "object",
                             "properties": {
                               "message": {
-                                "enum": ["Title cannot be empty."],
+                                "enum": [
+                                  "Title cannot be empty."
+                                ],
                                 "type": "string"
                               },
                               "cause": {
                                 "type": "object",
                                 "properties": {
                                   "code": {
-                                    "enum": ["reminders/invalid-title"],
+                                    "enum": [
+                                      "reminders/invalid-title"
+                                    ],
                                     "type": "string"
                                   },
                                   "detail": {
-                                    "enum": ["Title cannot be empty."],
+                                    "enum": [
+                                      "Title cannot be empty."
+                                    ],
                                     "type": "string"
                                   }
                                 },
-                                "required": ["code", "detail"],
+                                "required": [
+                                  "code",
+                                  "detail"
+                                ],
                                 "additionalProperties": false
                               }
                             },
-                            "required": ["message", "cause"],
+                            "required": [
+                              "message",
+                              "cause"
+                            ],
                             "additionalProperties": false
                           }
                         ]
@@ -3754,7 +3934,9 @@
                             "type": "object",
                             "properties": {
                               "code": {
-                                "enum": ["reminders/cancelled"],
+                                "enum": [
+                                  "reminders/cancelled"
+                                ],
                                 "type": "string"
                               },
                               "detail": {
@@ -3764,11 +3946,17 @@
                                 "type": "string"
                               }
                             },
-                            "required": ["code", "detail"],
+                            "required": [
+                              "code",
+                              "detail"
+                            ],
                             "additionalProperties": false
                           }
                         },
-                        "required": ["message", "cause"],
+                        "required": [
+                          "message",
+                          "cause"
+                        ],
                         "additionalProperties": false
                       }
                     },
@@ -3938,7 +4126,9 @@
       "get": {
         "operationId": "tasksList",
         "parameters": [],
-        "tags": ["tasks"],
+        "tags": [
+          "tasks"
+        ],
         "responses": {
           "200": {
             "description": "Response for 200",
@@ -3956,7 +4146,10 @@
                         "type": "string"
                       }
                     },
-                    "required": ["id", "title"],
+                    "required": [
+                      "id",
+                      "title"
+                    ],
                     "additionalProperties": false
                   }
                 }
@@ -3992,14 +4185,18 @@
       "post": {
         "operationId": "createTaskList",
         "parameters": [],
-        "tags": ["tasks"],
+        "tags": [
+          "tasks"
+        ],
         "description": "Create a new task list for the authenticated user.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "required": ["title"],
+                "required": [
+                  "title"
+                ],
                 "type": "object",
                 "properties": {
                   "title": {
@@ -4032,7 +4229,12 @@
                       "type": "string"
                     }
                   },
-                  "required": ["id", "userId", "title", "updatedAt"],
+                  "required": [
+                    "id",
+                    "userId",
+                    "title",
+                    "updatedAt"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -4078,7 +4280,9 @@
             }
           }
         ],
-        "tags": ["tasks"],
+        "tags": [
+          "tasks"
+        ],
         "responses": {
           "200": {
             "description": "Response for 200",
@@ -4167,7 +4371,9 @@
                             }
                           }
                         },
-                        "required": ["subtasks"],
+                        "required": [
+                          "subtasks"
+                        ],
                         "additionalProperties": false
                       },
                       {
@@ -4275,14 +4481,18 @@
             }
           }
         ],
-        "tags": ["tasks"],
+        "tags": [
+          "tasks"
+        ],
         "description": "Create a new task within a given task list owned by the authenticated user.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "required": ["title"],
+                "required": [
+                  "title"
+                ],
                 "type": "object",
                 "properties": {
                   "title": {
@@ -4387,7 +4597,9 @@
                           }
                         }
                       },
-                      "required": ["subtasks"],
+                      "required": [
+                        "subtasks"
+                      ],
                       "additionalProperties": false
                     },
                     {
@@ -4487,7 +4699,9 @@
       "get": {
         "operationId": "tasksTree",
         "parameters": [],
-        "tags": ["tasks"],
+        "tags": [
+          "tasks"
+        ],
         "description": "Return all task lists with their active tasks and subtasks for the authenticated user.",
         "responses": {
           "200": {
@@ -4584,7 +4798,9 @@
                                       }
                                     }
                                   },
-                                  "required": ["subtasks"],
+                                  "required": [
+                                    "subtasks"
+                                  ],
                                   "additionalProperties": false
                                 },
                                 {
@@ -4652,7 +4868,9 @@
                             }
                           }
                         },
-                        "required": ["tasks"],
+                        "required": [
+                          "tasks"
+                        ],
                         "additionalProperties": false
                       },
                       {
@@ -4671,7 +4889,12 @@
                             "type": "string"
                           }
                         },
-                        "required": ["id", "userId", "title", "updatedAt"],
+                        "required": [
+                          "id",
+                          "userId",
+                          "title",
+                          "updatedAt"
+                        ],
                         "additionalProperties": false
                       }
                     ]
@@ -4720,14 +4943,18 @@
             }
           }
         ],
-        "tags": ["tasks"],
+        "tags": [
+          "tasks"
+        ],
         "description": "Create a new subtask under a task owned by the authenticated user.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "required": ["title"],
+                "required": [
+                  "title"
+                ],
                 "type": "object",
                 "properties": {
                   "title": {
@@ -4866,7 +5093,9 @@
             }
           }
         ],
-        "tags": ["tasks"],
+        "tags": [
+          "tasks"
+        ],
         "description": "Mark a task as completed. Requires the task to belong to the authenticated user.",
         "responses": {
           "200": {
@@ -4954,7 +5183,9 @@
                           }
                         }
                       },
-                      "required": ["subtasks"],
+                      "required": [
+                        "subtasks"
+                      ],
                       "additionalProperties": false
                     },
                     {
@@ -5063,7 +5294,9 @@
             }
           }
         ],
-        "tags": ["tasks"],
+        "tags": [
+          "tasks"
+        ],
         "description": "Mark a subtask as completed. Requires the subtask to belong to the authenticated user.",
         "responses": {
           "200": {
@@ -5185,7 +5418,9 @@
             }
           }
         ],
-        "tags": ["tasks"],
+        "tags": [
+          "tasks"
+        ],
         "description": "Mark a task as needsAction (uncomplete). Requires the task to belong to the authenticated user.",
         "responses": {
           "200": {
@@ -5273,7 +5508,9 @@
                           }
                         }
                       },
-                      "required": ["subtasks"],
+                      "required": [
+                        "subtasks"
+                      ],
                       "additionalProperties": false
                     },
                     {
@@ -5382,7 +5619,9 @@
             }
           }
         ],
-        "tags": ["tasks"],
+        "tags": [
+          "tasks"
+        ],
         "description": "Mark a subtask as needsAction (uncomplete). Requires the subtask to belong to the authenticated user.",
         "responses": {
           "200": {
@@ -5504,7 +5743,9 @@
             }
           }
         ],
-        "tags": ["tasks"],
+        "tags": [
+          "tasks"
+        ],
         "description": "Update a task's title and/or notes. Requires the task to belong to the authenticated user.",
         "requestBody": {
           "required": false,
@@ -5611,7 +5852,9 @@
                           }
                         }
                       },
-                      "required": ["subtasks"],
+                      "required": [
+                        "subtasks"
+                      ],
                       "additionalProperties": false
                     },
                     {
@@ -5720,7 +5963,9 @@
             }
           }
         ],
-        "tags": ["tasks"],
+        "tags": [
+          "tasks"
+        ],
         "description": "Update a subtask's title and/or notes. Requires the subtask to belong to the authenticated user.",
         "requestBody": {
           "required": false,
@@ -5852,7 +6097,9 @@
       "post": {
         "operationId": "syncTasks",
         "parameters": [],
-        "tags": ["tasks"],
+        "tags": [
+          "tasks"
+        ],
         "description": "Sync Google Tasks into our TasksList/Task/Subtask models for the authenticated user.",
         "responses": {
           "200": {
@@ -5863,7 +6110,9 @@
                   "type": "object",
                   "properties": {
                     "status": {
-                      "enum": ["ok"],
+                      "enum": [
+                        "ok"
+                      ],
                       "type": "string"
                     },
                     "taskListsProcessed": {
@@ -5937,7 +6186,9 @@
             }
           }
         ],
-        "tags": ["timesheet"],
+        "tags": [
+          "timesheet"
+        ],
         "description": "Return hour entries grouped by client and month. Date range can be restricted via optional since/until.",
         "responses": {
           "200": {
@@ -5959,7 +6210,10 @@
                             "type": "string"
                           }
                         },
-                        "required": ["id", "name"],
+                        "required": [
+                          "id",
+                          "name"
+                        ],
                         "additionalProperties": false
                       },
                       "months": {
@@ -6023,7 +6277,10 @@
                                         "type": "string"
                                       }
                                     },
-                                    "required": ["id", "name"],
+                                    "required": [
+                                      "id",
+                                      "name"
+                                    ],
                                     "additionalProperties": false
                                   },
                                   "updatedAt": {
@@ -6045,12 +6302,19 @@
                               }
                             }
                           },
-                          "required": ["key", "label", "entries"],
+                          "required": [
+                            "key",
+                            "label",
+                            "entries"
+                          ],
                           "additionalProperties": false
                         }
                       }
                     },
-                    "required": ["client", "months"],
+                    "required": [
+                      "client",
+                      "months"
+                    ],
                     "additionalProperties": false
                   }
                 }
@@ -6088,14 +6352,19 @@
       "post": {
         "operationId": "getSignedUrl",
         "parameters": [],
-        "tags": ["files"],
+        "tags": [
+          "files"
+        ],
         "description": "Generate a signed URL for uploading files to cloud storage. Creates a file record and returns a time-limited upload URL. Supports PDF, PNG, JPG, and DICOM file types.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "required": ["name", "type"],
+                "required": [
+                  "name",
+                  "type"
+                ],
                 "type": "object",
                 "properties": {
                   "name": {
@@ -6140,29 +6409,41 @@
                         "Content-Type": {
                           "anyOf": [
                             {
-                              "enum": ["application/pdf"],
+                              "enum": [
+                                "application/pdf"
+                              ],
                               "type": "string"
                             },
                             {
-                              "enum": ["image/png"],
+                              "enum": [
+                                "image/png"
+                              ],
                               "type": "string"
                             },
                             {
-                              "enum": ["image/jpeg"],
+                              "enum": [
+                                "image/jpeg"
+                              ],
                               "type": "string"
                             },
                             {
-                              "enum": ["image/jpg"],
+                              "enum": [
+                                "image/jpg"
+                              ],
                               "type": "string"
                             },
                             {
-                              "enum": ["application/dicom"],
+                              "enum": [
+                                "application/dicom"
+                              ],
                               "type": "string"
                             }
                           ]
                         },
                         "x-goog-if-generation-match": {
-                          "enum": ["0"],
+                          "enum": [
+                            "0"
+                          ],
                           "type": "string"
                         },
                         "x-goog-meta-file-id": {
@@ -6177,7 +6458,11 @@
                       "additionalProperties": false
                     }
                   },
-                  "required": ["signedUrl", "fileId", "requiredHeaders"],
+                  "required": [
+                    "signedUrl",
+                    "fileId",
+                    "requiredHeaders"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -6223,7 +6508,9 @@
             }
           }
         ],
-        "tags": ["files"],
+        "tags": [
+          "files"
+        ],
         "description": "Get a list of files uploaded by a specific user, ordered by creation date. Returns file metadata including name, path, content type, and size.",
         "responses": {
           "200": {
@@ -6280,7 +6567,9 @@
                       }
                     }
                   },
-                  "required": ["records"],
+                  "required": [
+                    "records"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -6327,7 +6616,9 @@
             }
           }
         ],
-        "tags": ["files"],
+        "tags": [
+          "files"
+        ],
         "description": "Get detailed information about a specific file by its ID. Returns complete file metadata and properties.",
         "responses": {
           "200": {
@@ -6421,7 +6712,9 @@
             }
           }
         ],
-        "tags": ["files"],
+        "tags": [
+          "files"
+        ],
         "description": "Generate a short-lived signed URL for reading a file by its ID. Ensures the file belongs to the authenticated user.",
         "responses": {
           "200": {
@@ -6438,7 +6731,10 @@
                       "type": "string"
                     }
                   },
-                  "required": ["signedUrl", "expiresAt"],
+                  "required": [
+                    "signedUrl",
+                    "expiresAt"
+                  ],
                   "additionalProperties": false
                 }
               }
@@ -6476,12 +6772,17 @@
     "schemas": {
       "UnauthorizedErr": {
         "type": "object",
-        "required": ["type", "title"],
+        "required": [
+          "type",
+          "title"
+        ],
         "additionalProperties": false,
         "properties": {
           "error": {
             "type": "string",
-            "enum": ["Unauthorized"]
+            "enum": [
+              "Unauthorized"
+            ]
           }
         }
       },

@@ -1,5 +1,5 @@
 model Thought {
-  id String @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  id String @id @default(uuid(7)) @db.Uuid
 
   // References
   userId String
@@ -15,7 +15,7 @@ model Thought {
 }
 
 model BookmarkFolder {
-  id          String  @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  id          String  @id @default(uuid(7)) @db.Uuid
   name        String
   description String?
   color       String?

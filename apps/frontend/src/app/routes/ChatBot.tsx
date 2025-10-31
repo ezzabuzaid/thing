@@ -71,7 +71,9 @@ export default function ChatBot() {
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({
       api: `${client.options.baseUrl}/chat`,
+      credentials: 'include',
     }),
+
     onFinish({ messages }) {
       console.log('Chat finished', messages);
     },
