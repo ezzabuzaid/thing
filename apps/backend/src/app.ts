@@ -256,10 +256,11 @@ for await (const route of [
   import('./routes/reminders.route.ts'),
   import('./routes/tasks.route.ts'),
   import('./routes/timesheet.route.ts'),
-  import('./routes/ui.route.ts'),
 ]) {
-  route.default(app);
+  route.default(app.basePath('/api'));
 }
+
+(await import('./routes/ui.route.ts')).default(app);
 
 app.notFound((c) => {
   throw new HTTPException(404, {

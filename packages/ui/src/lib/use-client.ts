@@ -12,21 +12,14 @@ import {
 } from '@tanstack/react-query';
 import { Client, type Endpoints } from '@thing/client';
 
-export function getOrigin(defaultOrigin = ''): string {
-  let origin = '';
-  try {
-    origin = window.location.origin;
-  } catch {
-    origin = defaultOrigin;
-  }
-  return origin;
-}
+export const BASE_URL =
+  import.meta.env.VITE_API_URL === '/'
+    ? `${window.location.origin}/api`
+    : `${import.meta.env.VITE_API_URL}/api`;
+
 export const client = new Client({
   fetch: (request) => fetch(request as any, { credentials: 'include' }) as any,
-  baseUrl: 'http://localhost:3000',
-  // import.meta.env.VITE_API_URL === '/'
-  //   ? getOrigin('/')
-  //   : import.meta.env.VITE_API_URL,
+  baseUrl: BASE_URL,
 });
 
 type DataEndpoints = {
