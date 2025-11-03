@@ -70,7 +70,7 @@ export default function ChatBot() {
   const navigate = useNavigate();
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({
-      api: `${client.options.baseUrl}/chat`,
+      api: `${client.options.baseUrl}/api/chat`,
       credentials: 'include',
     }),
 

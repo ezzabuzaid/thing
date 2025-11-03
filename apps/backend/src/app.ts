@@ -1,5 +1,4 @@
 import { execute } from '@deepagents/agent';
-import { serveStatic } from '@hono/node-server/serve-static';
 import { Prisma, prisma } from '@thing/db';
 import {
   InvalidToolInputError,
@@ -39,7 +38,7 @@ app.on(['POST', 'GET'], '/api/auth/*', (c) => {
   return auth.handler(c.req.raw);
 });
 
-app.get('/health', async (c) => {
+app.get('/api/health', async (c) => {
   await prisma.$queryRaw`SELECT 1`;
   return c.json({ status: 'ok' });
 });
@@ -193,7 +192,7 @@ async function storeMessages(
   }
 }
 
-app.post('/chat', authenticate(), async (c) => {
+app.post('/api/chat', authenticate(), async (c) => {
   const { id: chatId, messages } = await c.req.json();
   const result = execute(
     faye,
