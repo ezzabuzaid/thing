@@ -1,7 +1,6 @@
+import { useForm } from '@tanstack/react-form';
 import type { GetScheduleById, ListSchedules } from '@thing/client';
 import {
-  Alert,
-  AlertDescription,
   Badge,
   Button,
   Card,
@@ -9,7 +8,10 @@ import {
   CardHeader,
   CardTitle,
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -18,8 +20,16 @@ import {
   Separator,
   Spinner,
   Textarea,
+  buttonVariants,
+  cn,
 } from '@thing/shadcn';
-import { useAction, useData } from '@thing/ui';
+import {
+  FieldMessage,
+  FormMessage,
+  errorToFormIssue,
+  useAction,
+  useData,
+} from '@thing/ui';
 import { CronExpressionParser } from 'cron-parser';
 import {
   Archive,
@@ -35,6 +45,7 @@ import {
 } from 'lucide-react';
 import React from 'react';
 import { useSearchParams } from 'react-router';
+import { z } from 'zod';
 
 import SelectorChips from '../components/ChipSelector.tsx';
 import { CronBuilder } from '../components/CronBuilder.tsx';
@@ -48,6 +59,31 @@ import {
   formatRelativeTime,
   formatShortDate,
 } from '../logic/time.ts';
+
+// Validation schemas
+const createScheduleSchema = z.object({
+  title: z.string().min(1, { message: 'Title is required' }),
+  cron: z.string().min(1, { message: 'Schedule is required' }),
+  instructions: z.string().min(1, { message: 'Instructions are required' }),
+  connectors: z.array(z.string()),
+  enabled: z.boolean(),
+});
+
+const editScheduleSchema = z.object({
+  title: z.string().min(1, { message: 'Title is required' }),
+  cron: z.string().min(1, { message: 'Schedule is required' }),
+  instructions: z.string().min(1, { message: 'Instructions are required' }),
+  connectors: z.array(z.string()),
+});
+
+const publishToMarketplaceSchema = z.object({
+  title: z.string().min(1, { message: 'Title is required' }),
+  cron: z.string().min(1, { message: 'Schedule is required' }),
+  instructions: z.string().min(1, { message: 'Instructions are required' }),
+  connectors: z.array(z.string()),
+  description: z.string().min(1, { message: 'Description is required' }),
+  tags: z.array(z.string()).min(1, { message: 'At least one tag is required' }),
+});
 
 function PauseButton({
   id,
@@ -129,39 +165,25 @@ export default function Schedules() {
 
   const selectedId = searchParams.get('id') ?? null;
 
-  // React.useEffect(() => {
-  //   const handler = () =>
-  //     setSearchParams(new URLSearchParams(window.location.search));
-  //   window.addEventListener('popstate', handler);
-  //   return () => window.removeEventListener('popstate', handler);
-  // }, []);
-
-  const handleSelect = (id: string) => {
-    // const next = new URLSearchParams(window.location.search);
-    // next.set('id', id);
-    // const url = `${window.location.pathname}?${next.toString()}`;
-    // window.history.pushState({}, '', url);
-    setSearchParams({ id });
-  };
-
   return (
-    <div className="h-full overflow-hidden">
-      <div className="container mx-auto px-4">
-        <Title>Schedules</Title>
-      </div>
-      <div className="container mx-auto px-4">
-        <div className="grid h-[calc(100vh-140px)] grid-cols-1 gap-4 md:grid-cols-[400px_1fr]">
-          <div className="overflow-hidden rounded-lg border">
-            <ListPane
-              response={data}
-              isLoading={isLoading}
-              selectedId={selectedId}
-              onSelect={handleSelect}
-            />
+    <div className="mx-auto h-full px-4">
+      <div className="grid h-full grid-cols-1 gap-4 md:grid-cols-7">
+        <div className="col-span-2 col-start-1 flex h-full flex-col">
+          <div className="flex items-center justify-between gap-2">
+            <Title>Schedules</Title>
+            <CreateScheduleForm />
           </div>
-          <div className="overflow-hidden rounded-lg border">
-            <DetailsPane selectedId={selectedId} />
-          </div>
+          <ListPane
+            response={data}
+            isLoading={isLoading}
+            selectedId={selectedId}
+            onSelect={(id) => {
+              setSearchParams({ id });
+            }}
+          />
+        </div>
+        <div className="col-span-full col-start-3 flex h-full flex-col overflow-auto border-l">
+          <DetailsPane selectedId={selectedId} />
         </div>
       </div>
     </div>
@@ -179,7 +201,6 @@ function ListPane({
   selectedId: string | null;
   onSelect: (id: string) => void;
 }) {
-  const [isCreating, setIsCreating] = React.useState(false);
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -195,71 +216,26 @@ function ListPane({
   if (records.length === 0) {
     return (
       <div className="h-full overflow-auto">
-        <div className="border-b p-3">
-          <div className="flex items-center">
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => setIsCreating((v) => !v)}
-            >
-              {isCreating ? 'Close' : 'New schedule'}
-            </Button>
-          </div>
+        <div className="text-muted-foreground flex h-full items-center justify-center p-4 text-center text-sm">
+          No schedules yet
         </div>
-        {isCreating ? (
-          <div className="p-3">
-            <CreateScheduleForm
-              onCancel={() => setIsCreating(false)}
-              onCreated={(id) => {
-                setIsCreating(false);
-                onSelect(id);
-              }}
-            />
-          </div>
-        ) : (
-          <div className="text-muted-foreground flex h-full items-center justify-center p-4 text-center text-sm">
-            No schedules yet
-          </div>
-        )}
       </div>
     );
   }
 
   return (
     <div className="h-full overflow-auto">
-      <div className="border-b p-3">
-        <div className="flex items-center">
-          <Button
-            type="button"
-            size="sm"
-            onClick={() => setIsCreating((v) => !v)}
-          >
-            {isCreating ? 'Close' : 'New schedule'}
-          </Button>
-        </div>
-      </div>
-      {isCreating && (
-        <div className="p-3">
-          <CreateScheduleForm
-            onCancel={() => setIsCreating(false)}
-            onCreated={(id) => {
-              setIsCreating(false);
-              onSelect(id);
-            }}
-          />
-        </div>
-      )}
-      <ul className="divide-y">
+      <ul className="space-y-2">
         {records.map((it) => (
           <li key={it.id}>
             <button
               type="button"
               onClick={() => onSelect(it.id)}
               aria-label={`Open schedule ${it.title}`}
-              className={
-                'hover:bg-muted/60 w-full px-4 py-3 text-left transition-colors ' +
-                (selectedId === it.id ? 'bg-muted' : '')
-              }
+              className={cn(
+                'hover:bg-muted/60 w-full rounded-sm border px-4 py-3 text-left transition-colors',
+                selectedId === it.id ? 'bg-muted' : '',
+              )}
             >
               <div className="flex items-center gap-2">
                 <div className="flex min-w-0 flex-col">
@@ -347,7 +323,7 @@ const Header = ({ schedule }: { schedule: GetScheduleById }) => {
 
   return (
     <div className="flex flex-col gap-3 p-4">
-      <div className="flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between">
         <span className="text-lg font-semibold">{schedule.title}</span>
         <div className="flex items-center gap-1">
           <Button
@@ -430,160 +406,182 @@ const Header = ({ schedule }: { schedule: GetScheduleById }) => {
   );
 };
 
-function CreateScheduleForm({
-  onCancel,
-  onCreated,
-}: {
-  onCancel: () => void;
-  onCreated: (id: string) => void;
-}) {
-  const create = useAction('POST /schedules', {
+function CreateScheduleForm() {
+  const createMutation = useAction('POST /schedules', {
     invalidate: ['GET /schedules'],
   });
-
-  const [title, setTitle] = React.useState('');
-  const [cron, setCron] = React.useState('');
-  const [instructions, setInstructions] = React.useState('');
-  const [enabled, setEnabled] = React.useState(true);
-  const [connectors, setConnectors] = React.useState<string[]>([]);
-  const [error, setError] = React.useState<string | null>(null);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    if (!title.trim() || !cron.trim() || !instructions.trim()) {
-      setError('Please fill title, cron and instructions.');
-      return;
-    }
-    create.mutate(
-      {
-        title: title.trim(),
-        cron: cron.trim(),
-        instructions: instructions.trim(),
-        enabled,
-        connectors,
-      },
-      {
-        onSuccess: (created) => {
-          onCreated(created.id);
-        },
-        onError: (err: any) => {
-          setError(err?.message ?? 'Failed to create schedule');
-        },
-      },
-    );
-  };
-
+  const [, setSearchParams] = useSearchParams();
   const connectorsQuery = useConnectors();
+  const [open, setOpen] = React.useState(false);
+
+  const form = useForm({
+    defaultValues: {
+      title: '',
+      cron: '',
+      instructions: '',
+      connectors: [] as string[],
+      enabled: true,
+    },
+    validators: {
+      onSubmit: createScheduleSchema,
+      onSubmitAsync: async ({ value }) => {
+        try {
+          const created = await createMutation.mutateAsync({
+            title: value.title.trim(),
+            cron: value.cron.trim(),
+            instructions: value.instructions.trim(),
+            enabled: value.enabled,
+            connectors: value.connectors,
+          });
+          setSearchParams({ id: created.id });
+          setOpen(false);
+          return;
+        } catch (error) {
+          return errorToFormIssue(error);
+        }
+      },
+    },
+  });
 
   return (
-    <form onSubmit={handleSubmit} className="grid gap-3">
-      <FormError error={error} />
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger
+        className={buttonVariants({
+          variant: 'outline',
+          size: 'sm',
+        })}
+      >
+        New schedule
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-xl">
+        <DialogHeader>
+          <DialogTitle>Create Schedule</DialogTitle>
+          <DialogDescription>
+            Create a new schedule for your tasks.
+          </DialogDescription>
+        </DialogHeader>
 
-      <ScheduleTitleField
-        id="create-sched-title"
-        value={title}
-        onChange={setTitle}
-      />
-
-      <CronBuilder cron={cron} onCronChange={setCron} />
-
-      <ScheduleInstructionsField
-        id="create-sched-instructions"
-        value={instructions}
-        onChange={setInstructions}
-      />
-
-      <div className="grid gap-2">
-        <Label className="text-xs font-medium">Supported connectors</Label>
-        <SelectorChips
-          options={connectorsQuery?.connectors}
-          value={connectors}
-          onChange={(its) => setConnectors(its)}
-        />
-      </div>
-
-      <div className="flex items-center gap-2">
-        <Button type="submit" disabled={create.isPending}>
-          {create.isPending ? (
-            <span className="flex items-center gap-2">
-              <Spinner /> Creating…
-            </span>
-          ) : (
-            'Create'
-          )}
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={onCancel}
-          disabled={create.isPending}
+        <form
+          className="grid gap-4"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            await form.handleSubmit();
+          }}
         >
-          Cancel
-        </Button>
-      </div>
-    </form>
-  );
-}
+          <form.Field
+            name="title"
+            children={(field) => (
+              <div className="flex gap-4">
+                <Label
+                  htmlFor="create-sched-title"
+                  className="min-w-20 font-medium"
+                >
+                  Title
+                </Label>
+                <div className="flex-1">
+                  <Input
+                    id="create-sched-title"
+                    placeholder="Weekly status email"
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    aria-label="Schedule title"
+                    className="bg-transparent"
+                  />
+                  <FieldMessage errors={field.state.meta.errors} />
+                </div>
+              </div>
+            )}
+          />
 
-function FormError({ error }: { error: string | null }) {
-  if (!error) return null;
-  return (
-    <Alert variant="destructive">
-      <AlertDescription>{error}</AlertDescription>
-    </Alert>
-  );
-}
+          <form.Field
+            name="cron"
+            children={(field) => (
+              <div className="grid gap-4">
+                <CronBuilder
+                  value={field.state.value}
+                  onChange={(cron) => field.handleChange(cron)}
+                />
+                {/* <div className="text-muted-foreground text-xs">
+                  Cron preview: {field.state.value}
+                </div> */}
+                <FieldMessage errors={field.state.meta.errors} />
+              </div>
+            )}
+          />
 
-function ScheduleTitleField({
-  id,
-  value,
-  onChange,
-}: {
-  id: string;
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <div className="grid gap-1">
-      <Label htmlFor={id} className="text-xs font-medium">
-        Title
-      </Label>
-      <Input
-        id={id}
-        placeholder="Weekly status email"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        aria-label="Schedule title"
-      />
-    </div>
-  );
-}
+          <form.Field
+            name="instructions"
+            children={(field) => (
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="create-sched-instructions"
+                  className="font-medium"
+                >
+                  Instructions
+                </Label>
+                <Textarea
+                  id="create-sched-instructions"
+                  placeholder="Describe what this schedule should do..."
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  aria-label="Schedule instructions"
+                  rows={3}
+                  className="max-h-40 min-h-40"
+                />
+                <FieldMessage errors={field.state.meta.errors} />
+              </div>
+            )}
+          />
 
-function ScheduleInstructionsField({
-  id,
-  value,
-  onChange,
-}: {
-  id: string;
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <div className="grid gap-1">
-      <Label htmlFor={id} className="text-xs font-medium">
-        Instructions
-      </Label>
-      <Textarea
-        id={id}
-        placeholder="Describe what this schedule should do..."
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        aria-label="Schedule instructions"
-        rows={3}
-        className="max-h-48"
-      />
-    </div>
+          <form.Field
+            name="connectors"
+            children={(field) => (
+              <div className="grid gap-2">
+                <Label className="font-medium">Supported connectors</Label>
+                <SelectorChips
+                  options={connectorsQuery?.connectors}
+                  value={field.state.value}
+                  onChange={(its) => field.handleChange(its)}
+                />
+                <FieldMessage errors={field.state.meta.errors} />
+              </div>
+            )}
+          />
+
+          <form.Subscribe
+            selector={(state) => state.errors}
+            children={(errors) => <FormMessage errors={errors} />}
+          />
+
+          <DialogFooter>
+            <form.Subscribe
+              selector={(state) => [state.canSubmit, state.isSubmitting]}
+              children={([canSubmit, isSubmitting]) => (
+                <div className="flex items-center gap-2">
+                  <Button type="submit" disabled={!canSubmit || isSubmitting}>
+                    {isSubmitting ? (
+                      <span className="flex items-center gap-2">
+                        <Spinner /> Creating…
+                      </span>
+                    ) : (
+                      'Create'
+                    )}
+                  </Button>
+                  <DialogClose
+                    className={cn(buttonVariants({ variant: 'ghost' }))}
+                  >
+                    Cancel
+                  </DialogClose>
+                </div>
+              )}
+            />
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -603,7 +601,7 @@ function EditButton({ schedule }: { schedule: GetScheduleById }) {
           <Pencil className="size-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>Edit Schedule</DialogTitle>
         </DialogHeader>
@@ -626,80 +624,138 @@ function EditScheduleForm({
   const update = useAction('PATCH /schedules/{id}', {
     invalidate: ['GET /schedules', 'GET /schedules/{id}'],
   });
-
-  const [title, setTitle] = React.useState(schedule.title);
-  const [cron, setCron] = React.useState(schedule.cron);
-  const [instructions, setInstructions] = React.useState(schedule.instructions);
-  const [connectors, setConnectors] = React.useState<string[]>(
-    schedule.connectors ?? [],
-  );
-  const [error, setError] = React.useState<string | null>(null);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    if (!title.trim() || !cron.trim() || !instructions.trim()) {
-      setError('Please fill title, cron and instructions.');
-      return;
-    }
-    update.mutate(
-      {
-        id: schedule.id,
-        title: title.trim(),
-        cron: cron.trim(),
-        instructions: instructions.trim(),
-        connectors,
-      },
-      {
-        onSuccess: () => {
-          onSuccess();
-        },
-        onError: (err: any) => {
-          setError(err?.message ?? 'Failed to update schedule');
-        },
-      },
-    );
-  };
   const connectorsQuery = useConnectors();
 
+  const form = useForm({
+    defaultValues: {
+      title: schedule.title,
+      cron: schedule.cron,
+      instructions: schedule.instructions,
+      connectors: schedule.connectors ?? [],
+    },
+    validators: {
+      onSubmit: editScheduleSchema,
+      onSubmitAsync: async ({ value }) => {
+        try {
+          await update.mutateAsync({
+            id: schedule.id,
+            title: value.title.trim(),
+            cron: value.cron.trim(),
+            instructions: value.instructions.trim(),
+            connectors: value.connectors,
+          });
+          onSuccess();
+          return;
+        } catch (error) {
+          return errorToFormIssue(error);
+        }
+      },
+    },
+  });
+
   return (
-    <form onSubmit={handleSubmit} className="grid gap-3">
-      <FormError error={error} />
-
-      <ScheduleTitleField
-        id="edit-sched-title"
-        value={title}
-        onChange={setTitle}
+    <form
+      className="grid gap-3"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        await form.handleSubmit();
+      }}
+    >
+      <form.Field
+        name="title"
+        children={(field) => (
+          <div className="flex gap-4">
+            <Label htmlFor="edit-sched-title" className="min-w-20 font-medium">
+              Title
+            </Label>
+            <div className="flex-1">
+              <Input
+                id="edit-sched-title"
+                placeholder="Weekly status email"
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                aria-label="Schedule title"
+                className="bg-transparent"
+              />
+              <FieldMessage errors={field.state.meta.errors} />
+            </div>
+          </div>
+        )}
       />
 
-      <CronBuilder cron={cron} onCronChange={setCron} />
-
-      <ScheduleInstructionsField
-        id="edit-sched-instructions"
-        value={instructions}
-        onChange={setInstructions}
+      <form.Field
+        name="cron"
+        children={(field) => (
+          <div>
+            <CronBuilder
+              value={field.state.value}
+              onChange={(cron) => field.handleChange(cron)}
+            />
+            <FieldMessage errors={field.state.meta.errors} />
+          </div>
+        )}
       />
 
-      <div className="grid gap-2">
-        <Label className="text-xs font-medium">Supported connectors</Label>
-        <SelectorChips
-          options={connectorsQuery?.connectors}
-          value={connectors}
-          onChange={setConnectors}
-        />
-      </div>
+      <form.Field
+        name="instructions"
+        children={(field) => (
+          <div className="grid gap-2">
+            <Label htmlFor="edit-sched-instructions" className="font-medium">
+              Instructions
+            </Label>
+            <Textarea
+              id="edit-sched-instructions"
+              placeholder="Describe what this schedule should do..."
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={(e) => field.handleChange(e.target.value)}
+              aria-label="Schedule instructions"
+              rows={3}
+              className="max-h-48 min-h-48"
+            />
+            <FieldMessage errors={field.state.meta.errors} />
+          </div>
+        )}
+      />
 
-      <div className="flex items-center gap-2">
-        <Button type="submit" disabled={update.isPending}>
-          {update.isPending ? (
-            <span className="flex items-center gap-2">
-              <Spinner /> Updating…
-            </span>
-          ) : (
-            'Update'
-          )}
-        </Button>
-      </div>
+      <form.Field
+        name="connectors"
+        children={(field) => (
+          <div className="grid gap-2">
+            <Label className="font-medium">Supported connectors</Label>
+            <SelectorChips
+              options={connectorsQuery?.connectors}
+              value={field.state.value}
+              onChange={(its) => field.handleChange(its)}
+            />
+            <FieldMessage errors={field.state.meta.errors} />
+          </div>
+        )}
+      />
+
+      <form.Subscribe
+        selector={(state) => state.errors}
+        children={(errors) => <FormMessage errors={errors} />}
+      />
+
+      <form.Subscribe
+        selector={(state) => [state.canSubmit, state.isSubmitting]}
+        children={([canSubmit, isSubmitting]) => (
+          <div className="flex items-center gap-2">
+            <Button type="submit" disabled={!canSubmit || isSubmitting}>
+              {isSubmitting ? (
+                <span className="flex items-center gap-2">
+                  <Spinner /> Updating…
+                </span>
+              ) : (
+                'Update'
+              )}
+            </Button>
+          </div>
+        )}
+      />
     </form>
   );
 }
@@ -760,8 +816,8 @@ const RunsList = ({
   };
 
   return (
-    <div className="grid gap-3">
-      <Card className="gap-4 py-4">
+    <div className="flex h-full flex-col">
+      <Card className="flex h-full flex-col gap-4 py-4">
         <CardHeader className="gap-0 px-4">
           <CardTitle className="flex items-center justify-between text-sm">
             <div className="flex flex-col gap-1">
@@ -815,7 +871,7 @@ const RunsList = ({
           </CardTitle>
         </CardHeader>
         <Separator />
-        <CardContent className="px-4 text-xs">
+        <CardContent className="flex-1 overflow-auto px-4 text-xs">
           <Message from={'assistant'}>
             <MessageContent className="rounded-none" variant={'flat'}>
               <Response>{currentRun.result}</Response>
@@ -875,217 +931,251 @@ function PublishToMarketplaceDialog({
       invalidate: ['GET /marketplace/templates'],
     },
   );
-
-  const [title, setTitle] = React.useState(schedule.title);
-  const [instructions, setInstructions] = React.useState(schedule.instructions);
-  const [cron, setCron] = React.useState(schedule.cron);
-  const [connectors, setConnectors] = React.useState<string[]>(
-    schedule.connectors,
-  );
-  const [description, setDescription] = React.useState('');
-  const [tags, setTags] = React.useState<string[]>([]);
-  const [tagInput, setTagInput] = React.useState('');
-  const [error, setError] = React.useState<string | null>(null);
-
   const connectorsQuery = useConnectors();
+  const [tagInput, setTagInput] = React.useState('');
 
-  const handleAddTag = () => {
-    const trimmed = tagInput.trim();
-    if (trimmed && tags.length < 3 && !tags.includes(trimmed)) {
-      setTags([...tags, trimmed]);
-      setTagInput('');
-    }
-  };
-
-  const handleRemoveTag = (tag: string) => {
-    setTags(tags.filter((t) => t !== tag));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    if (!title.trim() || !instructions.trim() || !cron.trim()) {
-      setError('Please fill in title, instructions, and schedule');
-      return;
-    }
-
-    if (!description.trim()) {
-      setError('Please provide a description');
-      return;
-    }
-
-    if (tags.length === 0) {
-      setError('Please add at least one tag');
-      return;
-    }
-
-    publish.mutate(
-      {
-        scheduleId: schedule.id,
-        title: title.trim(),
-        instructions: instructions.trim(),
-        suggestedCron: cron.trim(),
-        connectors,
-        description: description.trim(),
-        tags,
-      },
-      {
-        onSuccess: () => {
+  const form = useForm({
+    defaultValues: {
+      title: schedule.title,
+      cron: schedule.cron,
+      instructions: schedule.instructions,
+      connectors: schedule.connectors,
+      description: '',
+      tags: [] as string[],
+    },
+    validators: {
+      onSubmit: publishToMarketplaceSchema,
+      onSubmitAsync: async ({ value }) => {
+        try {
+          await publish.mutateAsync({
+            scheduleId: schedule.id,
+            title: value.title.trim(),
+            instructions: value.instructions.trim(),
+            suggestedCron: value.cron.trim(),
+            connectors: value.connectors,
+            description: value.description.trim(),
+            tags: value.tags,
+          });
           onOpenChange(false);
           // Reset form
-          setTitle(schedule.title);
-          setInstructions(schedule.instructions);
-          setCron(schedule.cron);
-          setConnectors(schedule.connectors);
-          setDescription('');
-          setTags([]);
+          form.reset();
           setTagInput('');
-        },
-        onError: (err: any) => {
-          setError(err?.message ?? 'Failed to publish to marketplace');
-        },
+          return;
+        } catch (error) {
+          return errorToFormIssue(error);
+        }
       },
-    );
-  };
+    },
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>Publish to Marketplace</DialogTitle>
           <p className="text-muted-foreground text-sm">
-            Review and customize your schedule before sharing it with the community
+            Review and customize your schedule before sharing it with the
+            community
           </p>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="grid gap-4">
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          <div className="grid gap-2">
-            <Label htmlFor="title">
-              Title <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter schedule title"
-            />
-          </div>
-
-          <CronBuilder cron={cron} onCronChange={setCron} />
-
-          <div className="grid gap-2">
-            <Label htmlFor="instructions">
-              Instructions <span className="text-destructive">*</span>
-            </Label>
-            <Textarea
-              id="instructions"
-              value={instructions}
-              onChange={(e) => setInstructions(e.target.value)}
-              placeholder="Enter schedule instructions"
-              rows={6}
-            />
-          </div>
-
-          <div className="grid gap-2">
-            <Label className="text-xs font-medium">Supported connectors</Label>
-            <SelectorChips
-              options={connectorsQuery?.connectors}
-              value={connectors}
-              onChange={(its) => setConnectors(its)}
-            />
-          </div>
-
-          <Separator />
-
-          <div className="grid gap-2">
-            <Label htmlFor="description">
-              Description <span className="text-destructive">*</span>
-            </Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe what this schedule does and who it's for..."
-              rows={4}
-            />
-            <p className="text-muted-foreground text-xs">
-              Help others understand when and why to use this schedule
-            </p>
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="tags">
-              Tags <span className="text-destructive">*</span>
-            </Label>
-            <div className="flex gap-2">
-              <Input
-                id="tags"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAddTag();
-                  }
-                }}
-                placeholder="e.g. productivity, news, automation"
-                disabled={tags.length >= 3}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleAddTag}
-                disabled={tags.length >= 3 || !tagInput.trim()}
-              >
-                Add
-              </Button>
-            </div>
-            {tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {tags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="gap-1">
-                    {tag}
-                    <X
-                      className="size-3 cursor-pointer"
-                      onClick={() => handleRemoveTag(tag)}
-                    />
-                  </Badge>
-                ))}
+        <form
+          className="grid gap-4"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            await form.handleSubmit();
+          }}
+        >
+          <form.Field
+            name="title"
+            children={(field) => (
+              <div className="flex gap-4">
+                <Label htmlFor="title" className="min-w-20 font-medium">
+                  Title
+                </Label>
+                <Input
+                  id="title"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  placeholder="Enter schedule title"
+                />
+                <FieldMessage errors={field.state.meta.errors} />
               </div>
             )}
-            <p className="text-muted-foreground text-xs">
-              {tags.length}/3 tags added
-            </p>
-          </div>
+          />
+
+          <form.Field
+            name="cron"
+            children={(field) => (
+              <div>
+                <CronBuilder
+                  value={field.state.value}
+                  onChange={(cron) => field.handleChange(cron)}
+                />
+                <FieldMessage errors={field.state.meta.errors} />
+              </div>
+            )}
+          />
+
+          <form.Field
+            name="instructions"
+            children={(field) => (
+              <div className="grid gap-2">
+                <Label htmlFor="instructions">Instructions</Label>
+                <Textarea
+                  id="instructions"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  placeholder="Enter schedule instructions"
+                  rows={6}
+                />
+                <FieldMessage errors={field.state.meta.errors} />
+              </div>
+            )}
+          />
+
+          <form.Field
+            name="connectors"
+            children={(field) => (
+              <div className="grid gap-2">
+                <Label className="font-medium">Supported connectors</Label>
+                <SelectorChips
+                  options={connectorsQuery?.connectors}
+                  value={field.state.value}
+                  onChange={(its) => field.handleChange(its)}
+                />
+                <FieldMessage errors={field.state.meta.errors} />
+              </div>
+            )}
+          />
 
           <Separator />
 
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={publish.isPending}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={publish.isPending}>
-              {publish.isPending ? (
-                <span className="flex items-center gap-2">
-                  <Spinner className="size-4" /> Publishing…
-                </span>
-              ) : (
-                'Publish to Marketplace'
-              )}
-            </Button>
-          </div>
+          <form.Field
+            name="description"
+            children={(field) => (
+              <div className="grid gap-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  placeholder="Describe what this schedule does and who it's for..."
+                  rows={4}
+                />
+                <p className="text-muted-foreground text-xs">
+                  Help others understand when and why to use this schedule
+                </p>
+                <FieldMessage errors={field.state.meta.errors} />
+              </div>
+            )}
+          />
+
+          <form.Field
+            name="tags"
+            children={(field) => {
+              const handleAddTag = () => {
+                const trimmed = tagInput.trim();
+                const currentTags = field.state.value;
+                if (
+                  trimmed &&
+                  currentTags.length < 3 &&
+                  !currentTags.includes(trimmed)
+                ) {
+                  field.handleChange([...currentTags, trimmed]);
+                  setTagInput('');
+                }
+              };
+
+              const handleRemoveTag = (tag: string) => {
+                field.handleChange(field.state.value.filter((t) => t !== tag));
+              };
+
+              return (
+                <div className="grid gap-2">
+                  <Label htmlFor="tags">Tags</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="tags"
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddTag();
+                        }
+                      }}
+                      placeholder="e.g. productivity, news, automation"
+                      disabled={field.state.value.length >= 3}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleAddTag}
+                      disabled={
+                        field.state.value.length >= 3 || !tagInput.trim()
+                      }
+                    >
+                      Add
+                    </Button>
+                  </div>
+                  {field.state.value.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {field.state.value.map((tag) => (
+                        <Badge key={tag} variant="secondary" className="gap-1">
+                          {tag}
+                          <X
+                            className="size-3 cursor-pointer"
+                            onClick={() => handleRemoveTag(tag)}
+                          />
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  <p className="text-muted-foreground text-xs">
+                    {field.state.value.length}/3 tags added
+                  </p>
+                  <FieldMessage errors={field.state.meta.errors} />
+                </div>
+              );
+            }}
+          />
+
+          <Separator />
+
+          <form.Subscribe
+            selector={(state) => state.errors}
+            children={(errors) => <FormMessage errors={errors} />}
+          />
+
+          <form.Subscribe
+            selector={(state) => [state.canSubmit, state.isSubmitting]}
+            children={([canSubmit, isSubmitting]) => (
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={!canSubmit || isSubmitting}>
+                  {isSubmitting ? (
+                    <span className="flex items-center gap-2">
+                      <Spinner className="size-4" /> Publishing…
+                    </span>
+                  ) : (
+                    'Publish to Marketplace'
+                  )}
+                </Button>
+              </div>
+            )}
+          />
         </form>
       </DialogContent>
     </Dialog>

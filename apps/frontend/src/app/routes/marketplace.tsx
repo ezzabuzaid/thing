@@ -465,7 +465,7 @@ function UseScheduleDialog({
             />
           </div>
 
-          <CronBuilder cron={cron} onCronChange={setCron} />
+          <CronBuilder value={cron} onChange={setCron} />
 
           <div className="grid gap-2">
             <Label htmlFor="instructions">Instructions</Label>

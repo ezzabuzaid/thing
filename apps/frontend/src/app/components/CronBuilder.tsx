@@ -1,28 +1,106 @@
 import {
-  Input,
+  Button,
+  Calendar,
   Label,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
+  ToggleGroup,
+  ToggleGroupItem,
+  cn,
 } from '@thing/shadcn';
-import {
-  addDays,
-  eachMonthOfInterval,
-  format,
-  getDaysInMonth,
-  startOfWeek,
-} from 'date-fns';
-import React from 'react';
+import { addDays, format, startOfWeek } from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
+import React, { useCallback, useEffect } from 'react';
 
+type Frequency = 'once' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+
+// Helper to parse cron expression and extract UI state components
+const parseCron = (cronStr: string): {
+  frequency: Frequency;
+  hour: number;
+  onceDate: string;
+  weekDay: number;
+  monthDay: number;
+} | null => {
+  if (!cronStr || !cronStr.trim()) return null;
+
+  try {
+    const parts = cronStr.trim().split(/\s+/);
+    if (parts.length !== 5) return null;
+
+    const [_minute, hour, dom, month, dow] = parts;
+
+    const h = parseInt(hour, 10);
+    if (isNaN(h) || h < 0 || h > 23) return null;
+
+    // Determine frequency based on pattern
+    if (month !== '*' && dom !== '*') {
+      // yearly/once: m h dom mon *
+      const monthNum = parseInt(month, 10);
+      const dayNum = parseInt(dom, 10);
+      if (isNaN(monthNum) || isNaN(dayNum)) return null;
+
+      const year = new Date().getFullYear();
+      const dateStr = `${year}-${String(monthNum).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+
+      return {
+        frequency: 'yearly',
+        hour: h,
+        onceDate: dateStr,
+        weekDay: 1,
+        monthDay: 1,
+      };
+    } else if (dom !== '*' && month === '*') {
+      // monthly: m h dom * *
+      const dayNum = parseInt(dom, 10);
+      if (isNaN(dayNum) || dayNum < 1 || dayNum > 31) return null;
+
+      return {
+        frequency: 'monthly',
+        hour: h,
+        onceDate: '',
+        weekDay: 1,
+        monthDay: dayNum,
+      };
+    } else if (dow !== '*' && month === '*' && dom === '*') {
+      // weekly: m h * * dow
+      const dayOfWeek = parseInt(dow, 10);
+      if (isNaN(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) return null;
+
+      return {
+        frequency: 'weekly',
+        hour: h,
+        onceDate: '',
+        weekDay: dayOfWeek,
+        monthDay: 1,
+      };
+    } else {
+      // daily: m h * * *
+      return {
+        frequency: 'daily',
+        hour: h,
+        onceDate: '',
+        weekDay: 1,
+        monthDay: 1,
+      };
+    }
+  } catch (e) {
+    return null;
+  }
+};
 
 export function CronBuilder({
-  cron,
-  onCronChange,
+  value,
+  onChange,
 }: {
-  cron: string;
-  onCronChange: (cron: string) => void;
+  value: string;
+  onChange: (value: string) => void;
 }) {
   const today = React.useMemo(() => {
     const d = new Date();
@@ -37,112 +115,149 @@ export function CronBuilder({
   const [onceDate, setOnceDate] = React.useState<string>(today);
   const [weekDay, setWeekDay] = React.useState<number>(1); // 1=Mon
   const [monthDay, setMonthDay] = React.useState<number>(1);
-  const [yearMonth, setYearMonth] = React.useState<number>(1);
 
-  const cronValue = React.useMemo(() => {
-    const hh = String(hour).padStart(2, '0');
-    const time = `${hh}:00`;
-    return composingCron({
+  // Initialize state from value prop when it changes
+  useEffect(() => {
+    if (!value) return;
+
+    const parsed = parseCron(value);
+    if (parsed) {
+      setFrequency(parsed.frequency);
+      setHour(parsed.hour);
+      setOnceDate(parsed.onceDate || today);
+      setWeekDay(parsed.weekDay);
+      setMonthDay(parsed.monthDay);
+    }
+  }, [value, today]);
+
+  const handleChange = useCallback(
+    ({
       frequency,
-      time,
+      hour,
+      monthDay,
       onceDate,
       weekDay,
-      monthDay,
-      yearMonth,
-    });
-  }, [frequency, hour, onceDate, weekDay, monthDay, yearMonth]);
-
-  React.useEffect(() => {
-    onCronChange(cronValue);
-  }, [cronValue, onCronChange]);
+    }: {
+      frequency: Frequency;
+      hour: number;
+      onceDate: string;
+      weekDay: number;
+      monthDay: number;
+    }) => {
+      const hh = String(hour).padStart(2, '0');
+      const time = `${hh}:00`;
+      return composingCron({ frequency, time, onceDate, weekDay, monthDay });
+    },
+    [frequency, hour, onceDate, weekDay, monthDay],
+  );
 
   return (
-    <div className="grid gap-2">
-      <div className="grid gap-1">
-        <Label htmlFor="cron-frequency" className="text-xs font-medium">
+    <div className="grid gap-4">
+      <div className="flex gap-4">
+        <Label htmlFor="cron-frequency" className="min-w-20 font-medium">
           Frequency
         </Label>
-        <Select
+        <ToggleGroup
+          className="w-full border"
+          type="single"
           value={frequency}
-          onValueChange={(v) => setFrequency(v as Frequency)}
+          onValueChange={(value) => {
+            setFrequency(value as Frequency);
+            onChange(
+              handleChange({
+                frequency: value as Frequency,
+                hour,
+                monthDay,
+                onceDate,
+                weekDay,
+              }),
+            );
+          }}
+          aria-label="Select frequency"
         >
-          <SelectTrigger id="cron-frequency" aria-label="Select frequency">
-            <SelectValue placeholder="Select frequency" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="once">Once</SelectItem>
-            <SelectItem value="daily">Daily</SelectItem>
-            <SelectItem value="weekly">Weekly</SelectItem>
-            <SelectItem value="monthly">Monthly</SelectItem>
-            <SelectItem value="yearly">Yearly</SelectItem>
-          </SelectContent>
-        </Select>
+          <ToggleGroupItem value="once" className="flex-1">Once</ToggleGroupItem>
+          <ToggleGroupItem value="daily" className="flex-1">Daily</ToggleGroupItem>
+          <ToggleGroupItem value="weekly" className="flex-1">Weekly</ToggleGroupItem>
+          <ToggleGroupItem value="monthly" className="flex-1">Monthly</ToggleGroupItem>
+          <ToggleGroupItem value="yearly" className="flex-1">Yearly</ToggleGroupItem>
+        </ToggleGroup>
       </div>
 
-      <HourField value={hour} onChange={setHour} />
+      <div className="flex flex-col gap-2 rounded-lg border px-4 py-4">
+        <HourField
+          value={hour}
+          onChange={(value) => {
+            setHour(value);
+            onChange(
+              handleChange({
+                frequency,
+                hour: value,
+                monthDay,
+                onceDate,
+                weekDay,
+              }),
+            );
+          }}
+        />
 
-      {frequency === 'once' && (
-        <div className="grid gap-1">
-          <Label className="text-xs font-medium" htmlFor="cron-once-date">
-            Date
-          </Label>
-          <Input
-            id="cron-once-date"
-            type="date"
+        {(frequency === 'once' || frequency === 'yearly') && (
+          <DateField
             value={onceDate}
-            onChange={(e) => setOnceDate(e.target.value)}
-            aria-label="Select date"
+            onChange={(value) => {
+              setOnceDate(value);
+              onChange(
+                handleChange({
+                  frequency,
+                  hour,
+                  monthDay,
+                  onceDate: value,
+                  weekDay,
+                }),
+              );
+            }}
           />
-          <span className="text-muted-foreground text-xs">
-            Note: Cron doesn't include the year. "Once" will create a yearly
-            cron for the chosen date; you can disable the schedule after it
-            runs.
-          </span>
-        </div>
-      )}
+        )}
 
-      {frequency === 'weekly' && (
-        <WeekField value={weekDay} onChange={setWeekDay} />
-      )}
+        {frequency === 'weekly' && (
+          <WeekField
+            value={weekDay}
+            onChange={(value) => {
+              setWeekDay(value);
+              onChange(
+                handleChange({
+                  frequency,
+                  hour,
+                  monthDay,
+                  onceDate,
+                  weekDay: value,
+                }),
+              );
+            }}
+          />
+        )}
 
-      {(frequency === 'monthly' || frequency === 'yearly') && (
-        <div className="grid grid-cols-2 gap-2">
+        {frequency === 'monthly' && (
           <MonthField
             value={monthDay}
-            onChange={setMonthDay}
-            maxDays={
-              frequency === 'yearly'
-                ? getDaysInMonth(
-                    new Date(new Date().getFullYear(), yearMonth - 1, 1),
-                  )
-                : 31
-            }
+            onChange={(value) => {
+              setMonthDay(value);
+              onChange(
+                handleChange({
+                  frequency,
+                  hour,
+                  monthDay: value,
+                  onceDate,
+                  weekDay,
+                }),
+              );
+            }}
+            maxDays={31}
           />
-          {frequency === 'yearly' && (
-            <YearField
-              value={yearMonth}
-              onChange={(n) => {
-                setYearMonth(n);
-                // Clamp day if needed when month changes
-                const md = getDaysInMonth(
-                  new Date(new Date().getFullYear(), n - 1, 1),
-                );
-                setMonthDay((d) => Math.min(d, md));
-              }}
-            />
-          )}
-        </div>
-      )}
-
-      <div className="text-muted-foreground text-xs">Cron preview: {cron}</div>
+        )}
+      </div>
     </div>
   );
 }
-
-
-
-
-
 
 // WeekField: choose day of week (0=Sun..6=Sat) using date-fns for labels
 function WeekField({
@@ -161,8 +276,8 @@ function WeekField({
     [start],
   );
   return (
-    <div className="grid gap-1">
-      <Label htmlFor="cron-weekday" className="text-xs font-medium">
+    <div className="flex gap-4">
+      <Label htmlFor="cron-weekday" className="min-w-24 shrink-0 font-medium">
         Day of week
       </Label>
       <Select value={String(value)} onValueChange={(v) => onChange(Number(v))}>
@@ -177,6 +292,62 @@ function WeekField({
           ))}
         </SelectContent>
       </Select>
+    </div>
+  );
+}
+
+// DateField: choose a specific date using a calendar picker
+function DateField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (date: string) => void;
+}) {
+  const [open, setOpen] = React.useState(false);
+  const selectedDate = value ? new Date(value) : undefined;
+
+  const handleSelect = (date: Date | undefined) => {
+    if (date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      onChange(`${y}-${m}-${d}`);
+      setOpen(false);
+    }
+  };
+
+  return (
+    <div className="flex gap-4">
+      <Label htmlFor="cron-date" className="min-w-24 font-medium">
+        Date
+      </Label>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            id="cron-date"
+            variant="outline"
+            className={cn(
+              'w-full justify-between text-left font-normal',
+              !selectedDate && 'text-muted-foreground',
+            )}
+          >
+            {selectedDate ? (
+              format(selectedDate, 'PPP')
+            ) : (
+              <span>Pick a date</span>
+            )}
+            <CalendarIcon className="mr-2 size-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            onSelect={handleSelect}
+          />
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
@@ -196,54 +367,22 @@ function MonthField({
     [maxDays],
   );
   return (
-    <div className="grid gap-1">
-      <Label htmlFor="cron-dom" className="text-xs font-medium">
+    <div className="flex gap-4">
+      <Label htmlFor="cron-dom" className="min-w-24 shrink-0 font-medium">
         Day of month
       </Label>
       <Select value={String(value)} onValueChange={(v) => onChange(Number(v))}>
-        <SelectTrigger id="cron-dom" aria-label="Day of month">
+        <SelectTrigger
+          className="w-full"
+          id="cron-dom"
+          aria-label="Day of month"
+        >
           <SelectValue placeholder="Day of month" />
         </SelectTrigger>
         <SelectContent>
           {days.map((d) => (
             <SelectItem key={d} value={String(d)}>
               {d}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  );
-}
-
-function YearField({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (n: number) => void;
-}) {
-  const months = React.useMemo(
-    () =>
-      eachMonthOfInterval({
-        start: new Date(new Date().getFullYear(), 0, 1),
-        end: new Date(new Date().getFullYear(), 11, 31),
-      }).map((d, idx) => ({ idx: idx + 1, label: format(d, 'LLLL') })),
-    [],
-  );
-  return (
-    <div className="grid gap-1">
-      <Label htmlFor="cron-month" className="text-xs font-medium">
-        Month
-      </Label>
-      <Select value={String(value)} onValueChange={(v) => onChange(Number(v))}>
-        <SelectTrigger id="cron-month" aria-label="Select month">
-          <SelectValue placeholder="Select month" />
-        </SelectTrigger>
-        <SelectContent>
-          {months.map((m) => (
-            <SelectItem key={m.idx} value={String(m.idx)}>
-              {m.label}
             </SelectItem>
           ))}
         </SelectContent>
@@ -265,8 +404,8 @@ function HourField({
     [],
   );
   return (
-    <div className="grid gap-1">
-      <Label htmlFor="cron-hour" className="text-xs font-medium">
+    <div className="flex gap-4">
+      <Label htmlFor="cron-hour" className="min-w-24 font-medium">
         Time
       </Label>
       <Select value={String(value)} onValueChange={(v) => onChange(Number(v))}>
@@ -284,7 +423,7 @@ function HourField({
     </div>
   );
 }
-type Frequency='once' | 'daily' | 'weekly' | 'monthly' | 'yearly'
+
 // composingCron: Pure helper that builds a 5-field cron from simple inputs
 // Note: Standard 5-field cron has no year, so "once" becomes a yearly cron for the selected date.
 const composingCron = ({
@@ -293,14 +432,12 @@ const composingCron = ({
   onceDate,
   weekDay,
   monthDay,
-  yearMonth,
 }: {
-  frequency:  Frequency;
+  frequency: Frequency;
   time: string; // HH:mm
   onceDate: string; // YYYY-MM-DD
   weekDay: number; // 0..6
   monthDay: number; // 1..31
-  yearMonth: number; // 1..12
 }): string => {
   const [hoursStr, minutesStr] = time.split(':');
   const h = Math.max(0, Math.min(23, Number(hoursStr) || 0));
@@ -317,12 +454,7 @@ const composingCron = ({
     const dom = Math.max(1, Math.min(31, monthDay));
     return `${m} ${h} ${dom} * *`;
   }
-  if (frequency === 'yearly') {
-    const dom = Math.max(1, Math.min(31, monthDay));
-    const mon = Math.max(1, Math.min(12, yearMonth));
-    return `${m} ${h} ${dom} ${mon} *`;
-  }
-  // once
+  // once or yearly - both use the date picker
   const d = new Date(onceDate);
   const dom = d.getDate();
   const mon = d.getMonth() + 1;
