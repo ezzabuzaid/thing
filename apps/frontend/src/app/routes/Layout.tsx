@@ -1,4 +1,5 @@
 import {
+  Separator,
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -23,6 +24,8 @@ import {
   Repeat,
 } from 'lucide-react';
 import { Outlet } from 'react-router';
+
+import { NavUserDropdown } from '../components/NavUserDropdown.tsx';
 
 type SidebarItem = {
   name: string;
@@ -78,6 +81,8 @@ export default function Home() {
           <NavItems items={sidebar} />
         </SidebarContent>
         <SidebarFooter>
+          <NavUserDropdown />
+          <Separator />
           <SidebarTrigger />
         </SidebarFooter>
         <SidebarRail />

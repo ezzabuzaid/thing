@@ -128,7 +128,7 @@ export const timesheetAgent: Agent = agent({
         clientId: z.string().uuid().optional().describe('Filter by client ID'),
         keywords: z
           .array(z.string().min(1))
-          .optional()
+          .nullish()
           .transform((arr) => (arr ?? []).map((s) => s.trim()).filter(Boolean))
           .describe('Keywords to match in project name; all must match (AND).'),
       }),

@@ -18,7 +18,8 @@ import { addDays, format, startOfWeek } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import React, { useCallback, useEffect } from 'react';
 
-type Frequency = 'once' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+import type { Frequency } from '../utils/cron-utils.ts';
+import { parseCronExpression } from '../utils/cron-utils.ts';
 
 // Helper to parse cron expression and extract UI state components
 const parseCron = (cronStr: string): {
@@ -28,71 +29,52 @@ const parseCron = (cronStr: string): {
   weekDay: number;
   monthDay: number;
 } | null => {
-  if (!cronStr || !cronStr.trim()) return null;
+  const parsed = parseCronExpression(cronStr);
+  if (!parsed) return null;
 
-  try {
-    const parts = cronStr.trim().split(/\s+/);
-    if (parts.length !== 5) return null;
+  const { frequency, hour, dayOfMonth, month, dayOfWeek } = parsed;
 
-    const [_minute, hour, dom, month, dow] = parts;
+  // Build UI state based on frequency
+  if (frequency === 'yearly') {
+    // Construct date string for date picker
+    const year = new Date().getFullYear();
+    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(dayOfMonth).padStart(2, '0')}`;
 
-    const h = parseInt(hour, 10);
-    if (isNaN(h) || h < 0 || h > 23) return null;
-
-    // Determine frequency based on pattern
-    if (month !== '*' && dom !== '*') {
-      // yearly/once: m h dom mon *
-      const monthNum = parseInt(month, 10);
-      const dayNum = parseInt(dom, 10);
-      if (isNaN(monthNum) || isNaN(dayNum)) return null;
-
-      const year = new Date().getFullYear();
-      const dateStr = `${year}-${String(monthNum).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
-
-      return {
-        frequency: 'yearly',
-        hour: h,
-        onceDate: dateStr,
-        weekDay: 1,
-        monthDay: 1,
-      };
-    } else if (dom !== '*' && month === '*') {
-      // monthly: m h dom * *
-      const dayNum = parseInt(dom, 10);
-      if (isNaN(dayNum) || dayNum < 1 || dayNum > 31) return null;
-
-      return {
-        frequency: 'monthly',
-        hour: h,
-        onceDate: '',
-        weekDay: 1,
-        monthDay: dayNum,
-      };
-    } else if (dow !== '*' && month === '*' && dom === '*') {
-      // weekly: m h * * dow
-      const dayOfWeek = parseInt(dow, 10);
-      if (isNaN(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) return null;
-
-      return {
-        frequency: 'weekly',
-        hour: h,
-        onceDate: '',
-        weekDay: dayOfWeek,
-        monthDay: 1,
-      };
-    } else {
-      // daily: m h * * *
-      return {
-        frequency: 'daily',
-        hour: h,
-        onceDate: '',
-        weekDay: 1,
-        monthDay: 1,
-      };
-    }
-  } catch (e) {
-    return null;
+    return {
+      frequency,
+      hour,
+      onceDate: dateStr,
+      weekDay: 1,
+      monthDay: 1,
+    };
+  } else if (frequency === 'monthly') {
+    return {
+      frequency,
+      hour,
+      onceDate: '',
+      weekDay: 1,
+      monthDay: dayOfMonth ?? 1,
+    };
+  } else if (frequency === 'weekly') {
+    return {
+      frequency,
+      hour,
+      onceDate: '',
+      weekDay: dayOfWeek ?? 1,
+      monthDay: 1,
+    };
+  } else if (frequency === 'daily') {
+    return {
+      frequency,
+      hour,
+      onceDate: '',
+      weekDay: 1,
+      monthDay: 1,
+    };
   }
+
+  // Custom or unknown frequency - return null
+  return null;
 };
 
 export function CronBuilder({

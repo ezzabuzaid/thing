@@ -70,7 +70,7 @@ export default function ChatBot() {
   const navigate = useNavigate();
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({
-      api: `${client.options.baseUrl}/api/chat`,
+      api: `${client.options.baseUrl}/chat`,
       credentials: 'include',
     }),
 
@@ -500,7 +500,7 @@ function MessageContainer({
   return (
     <Message from={message.role} key={message.id}>
       <MessageContent
-        className={cn(message.role !== 'user' ? 'rounded-none' : '')}
+        className={cn(message.role !== 'user' ? 'rounded-none' : 'group-[.is-user]:bg-transparent shadow')}
         variant="flat"
       >
         {message.role === 'assistant' && process.length > 0 && (

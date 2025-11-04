@@ -1,5 +1,7 @@
 import { addDays, format, formatRelative, startOfWeek } from 'date-fns';
 
+import { parseCronExpression } from '../utils/cron-utils.ts';
+
 export function formatDateTime(date: Date | string): string {
   return format(date, 'PPpp');
 }
@@ -12,7 +14,10 @@ export function formatShortDate(date: Date | string): string {
   return format(date, 'EEE MMM dd yyyy');
 }
 
-export function formatDuration(startDate: Date | string, endDate: Date | string): string {
+export function formatDuration(
+  startDate: Date | string,
+  endDate: Date | string,
+): string {
   const start = new Date(startDate);
   const end = new Date(endDate);
   const diffMs = end.getTime() - start.getTime();
@@ -46,43 +51,34 @@ function getOrdinal(n: number): string {
 
 export function cronTitle(cronExpression: string): string {
   try {
-    const parts = cronExpression.trim().split(/\s+/);
-    if (parts.length !== 5) return cronExpression;
+    const parsed = parseCronExpression(cronExpression);
+    if (!parsed) return cronExpression;
 
-    const [minute, hour, dayOfMonth, month, dayOfWeek] = parts;
+    const { frequency, hour, minute, dayOfMonth, month, dayOfWeek } = parsed;
 
-    // Parse time
-    const h = parseInt(hour, 10);
-    const m = parseInt(minute, 10);
-    const timeStr = format(new Date(2000, 0, 1, h, m), 'h:mm a');
+    // Format time
+    const timeStr = format(new Date(2000, 0, 1, hour, minute), 'h:mm a');
 
-    // Daily: * * * (any day, any month, any day of week)
-    if (dayOfMonth === '*' && month === '*' && dayOfWeek === '*') {
+    // Generate title based on frequency
+    if (frequency === 'daily') {
       return `Daily at ${timeStr}`;
     }
 
-    // Weekly: specific day of week
-    if (dayOfMonth === '*' && month === '*' && dayOfWeek !== '*') {
-      const dow = parseInt(dayOfWeek, 10);
+    if (frequency === 'weekly' && dayOfWeek !== null) {
       const dayName = format(
-        addDays(startOfWeek(new Date(), { weekStartsOn: 0 }), dow),
+        addDays(startOfWeek(new Date(), { weekStartsOn: 0 }), dayOfWeek),
         'EEEE',
       );
       return `${dayName}s at ${timeStr}`;
     }
 
-    // Monthly: specific day of month
-    if (dayOfMonth !== '*' && month === '*' && dayOfWeek === '*') {
-      const day = parseInt(dayOfMonth, 10);
-      return `${getOrdinal(day)} of the month at ${timeStr}`;
+    if (frequency === 'monthly' && dayOfMonth !== null) {
+      return `${getOrdinal(dayOfMonth)} of the month at ${timeStr}`;
     }
 
-    // Yearly: specific month and day
-    if (dayOfMonth !== '*' && month !== '*') {
-      const day = parseInt(dayOfMonth, 10);
-      const mon = parseInt(month, 10);
-      const monthName = format(new Date(2000, mon - 1, 1), 'MMMM');
-      return `${monthName} ${getOrdinal(day)} at ${timeStr}`;
+    if (frequency === 'yearly' && dayOfMonth !== null && month !== null) {
+      const monthName = format(new Date(2000, month - 1, 1), 'MMMM');
+      return `${monthName} ${getOrdinal(dayOfMonth)} at ${timeStr}`;
     }
 
     // Fallback to raw cron if pattern doesn't match expected formats

@@ -1,19 +1,19 @@
 services:
   database:
-    image: postgres:17
+    image: postgres:16
     ports:
       - '5432:5432'
     environment:
       POSTGRES_PASSWORD: 'yourpassword'
-      POSTGRES_USER: 'youruser'
+      POSTGRES_USER: 'january'
       POSTGRES_DB: 'march'
-      PGDATA: /var/lib/postgresql/17/data
+      PGDATA: /var/lib/postgresql/16/data
     volumes:
-      - pgdata17:/var/lib/postgresql
+      - pgdata16:/var/lib/postgresql
     healthcheck:
-      test: ['CMD', 'pg_isready', '-U', 'youruser', '-d', 'march']
+      test: ['CMD', 'pg_isready', '-U', 'january', '-d', 'march']
     networks:
-      - app_network
+      - local_network
   backend:
     build:
       context: .
@@ -22,7 +22,7 @@ services:
     environment:
       LM_STUDIO_BASE_URL: 'http://host.docker.internal:1234/v1'
       NODE_ENV: production
-      CONNECTION_STRING: 'postgresql://youruser:yourpassword@database:5432/march'
+      CONNECTION_STRING: 'postgresql://january:yourpassword@database:5432/march'
     env_file:
       - ./apps/backend/.env
     ports:
@@ -31,9 +31,9 @@ services:
       database:
         condition: service_healthy
     networks:
-      - app_network
+      - local_network
 networks:
-  app_network:
+  local_network:
 
 volumes:
-  pgdata17: {}
+  pgdata16: {}

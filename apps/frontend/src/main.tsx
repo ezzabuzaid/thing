@@ -11,7 +11,8 @@ import LegalPrivacyPolicy from './app/routes/legal-privacy-policy.tsx';
 import LegalTermsServices from './app/routes/legal-terms-services.tsx';
 import Login from './app/routes/login.tsx';
 import Marketplace from './app/routes/marketplace.tsx';
-import Schedules from './app/routes/schedules.tsx';
+import SchedulesV2 from './app/routes/schedules/SchedulesV2.tsx';
+import Schedules from './app/routes/schedules/schedules.tsx';
 import Tasks from './app/routes/tasks.tsx';
 import Thought from './app/routes/thought.tsx';
 import ThoughtsTimeline from './app/routes/thoughtstimeline.tsx';
@@ -27,6 +28,17 @@ async function requiresAuth() {
 }
 
 const router = createBrowserRouter([
+  {
+    path: '/schedules-v2',
+    loader: requiresAuth,
+    Component: SchedulesV2,
+    children: [
+      {
+        path: 'marketplace',
+        Component: Marketplace,
+      },
+    ],
+  },
   {
     Component: Layout,
     loader: requiresAuth,

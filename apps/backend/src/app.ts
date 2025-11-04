@@ -38,7 +38,7 @@ app.on(['POST', 'GET'], '/api/auth/*', (c) => {
   return auth.handler(c.req.raw);
 });
 
-app.get('/api/health', async (c) => {
+app.get('/api/healthz', async (c) => {
   await prisma.$queryRaw`SELECT 1`;
   return c.json({ status: 'ok' });
 });
