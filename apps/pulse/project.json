@@ -1,0 +1,8 @@
+{
+  "name": "pulse",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/pulse/src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {}
+}
