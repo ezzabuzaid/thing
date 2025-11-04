@@ -22,12 +22,19 @@ import { faye } from './faye/faye.ts';
 import { auth } from './middlewares/auth.ts';
 import { authenticate } from './middlewares/middleware.ts';
 
+const allowedOrigins = (process.env.ALLOWED_ORIGINS ?? '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
 const app = new Hono().use(
   logger(),
   timing(),
   cors({
-    origin: (it) =>
-      process.env.NODE_ENV === 'development' ? it : process.env.ALLOWED_ORIGINS,
+    origin: (origin) => {
+      if (process.env.NODE_ENV === 'development') return origin;
+      if (!origin) return ''; // non-browser / missing Origin
+      return allowedOrigins.includes(origin) ? origin : '';
+    },
     credentials: true,
   }),
   requestId(),
