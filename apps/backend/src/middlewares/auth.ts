@@ -7,7 +7,10 @@ export const auth = betterAuth({
     provider: 'postgresql',
     debugLogs: false,
   }),
-  trustedOrigins: process.env.ALLOWED_ORIGINS.split(','),
+  trustedOrigins: (process.env.ALLOWED_ORIGINS ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID!,

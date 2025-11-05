@@ -9,7 +9,7 @@ export default function (router: Hono) {
     relative(process.cwd(), import.meta.dirname),
     '../',
     '../',
-    'frontend',
+    'pulse',
     'dist',
   );
   router.use('*', serveStatic({ root: dir }));
