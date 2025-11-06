@@ -249,7 +249,7 @@ export default function CreateScheduleForm() {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={setOpen} >
       <DialogTrigger
         className={buttonVariants({
           variant: 'secondary',
@@ -258,7 +258,7 @@ export default function CreateScheduleForm() {
       >
         New schedule
       </DialogTrigger>
-      <DialogContent className="sm:max-w-xl">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Create Schedule</DialogTitle>
           <DialogDescription>

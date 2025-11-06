@@ -39,10 +39,56 @@ export const browserSearchAgent = agent({
   },
 });
 
-export const runnerAgent = agent({
-  name: 'ScheduleRunner',
-  model: groq('openai/gpt-oss-20b'),
-  prompt: `
+const CONNECTOR_AGENTS = {
+  'web search': browserSearchAgent,
+  hackernews: hackerNewsConnector,
+} as const;
+
+type ConnectorKey = keyof typeof CONNECTOR_AGENTS;
+
+const DEFAULT_CONNECTOR_KEYS: ConnectorKey[] = ['web search', 'hackernews'];
+
+const resolveConnectorAgents = (keys: readonly string[] | undefined) => {
+  const resolved = new Map<string, (typeof CONNECTOR_AGENTS)[ConnectorKey]>();
+
+  for (const it of keys ?? []) {
+    if (Object.prototype.hasOwnProperty.call(CONNECTOR_AGENTS, it)) {
+      const agentInstance = CONNECTOR_AGENTS[it as ConnectorKey];
+      resolved.set(agentInstance.internalName, agentInstance);
+    }
+  }
+
+  if (resolved.size === 0) {
+    for (const key of DEFAULT_CONNECTOR_KEYS) {
+      const agentInstance = CONNECTOR_AGENTS[key];
+      resolved.set(agentInstance.internalName, agentInstance);
+    }
+  }
+
+  return Array.from(resolved.values());
+};
+
+const describeAgentSelection = (
+  agents: Array<(typeof CONNECTOR_AGENTS)[ConnectorKey]>,
+) =>
+  agents
+    .map(
+      (agentInstance) =>
+        `- ${agentInstance.handoff.name}: ${agentInstance.handoff.handoffDescription}`,
+    )
+    .join('\n');
+
+export const runnerAgent = (agents: readonly string[]) => {
+  const selectedAgents = resolveConnectorAgents(agents);
+  const selectedTools = Object.assign(
+    {},
+    ...selectedAgents.map((agentInstance) => agentInstance.toTool()),
+  );
+
+  return agent({
+    name: 'ScheduleRunner',
+    model: groq('openai/gpt-oss-20b'),
+    prompt: `
     <SystemContext>
       Your name is ScheduleRunner, you work in an app named "Schedules". You are an autonomous agent designed to manage and execute scheduled tasks efficiently.
 
@@ -53,20 +99,20 @@ export const runnerAgent = agent({
 
     <UserSelectedAgents>
       The user has selected the following agents to assist you in completing the scheduled task:
-      - ${hackerNewsConnector.handoff.name}: ${hackerNewsConnector.handoff.handoffDescription}
-      - ${browserSearchAgent.handoff.name}: ${browserSearchAgent.handoff.handoffDescription}
-
-      Make sure not to mistake calling the agents own tools, your own tools are ${hackerNewsConnector.internalName} and ${browserSearchAgent.internalName} that you can use to delegate tasks to the respective agents.
+${describeAgentSelection(selectedAgents)}
     </UserSelectedAgents>
 
     <AgentResponsibilities>
-      Make sure to not to mix up the agents and use them according to their defined responsibilities. for example, use the HackerNews connector for tasks related to HackerNews data and the browser search agent for general web searches.
-      Generaly speaking, if user requested to use a web search related agent along with other specialized agents, then always deprioritize the web search agent and focus on using the specialized agents to complete the task and use the web search agent only when absolutely necessary.
+      Use agents according to their specialization. Prefer the most relevant specialized agent before using general-purpose tooling. Only proceed without calling an agent when none of their capabilities apply to the task at hand.
     </AgentResponsibilities>
 
     <ErrorHandling>
       If you encounter any issues while using the agents, such as an agent being unable to complete a task or returning an error. Make sure to retry again before giving up on the task. analyze the error message and adjust your approach accordingly to successfully complete the scheduled task.
     </ErrorHandling>
+
+    <ToolUsage>
+      You can call the following agent tools: ${selectedAgents}. Ensure you invoke the appropriate tool for each subtask instead of reimplementing their capabilities yourself.
+    </ToolUsage>
 
     <CriticalNotes>
       - The "user" won't see the result of your work until the task is complete.
@@ -75,11 +121,9 @@ export const runnerAgent = agent({
       - If a task cannot be completed, provide a detailed explanation of why it couldn't be accomplished.
     </CriticalNotes>
   `,
-  tools: {
-    ...browserSearchAgent.toTool(),
-    ...hackerNewsConnector.toTool(),
-  },
-});
+    tools: selectedTools,
+  });
+};
 
 export const conciseSyntheizerAgent = agent({
   name: 'ConciseSyntheizerAgent',

@@ -453,7 +453,7 @@ export default async function (router: Hono) {
 
 async function runSchedule(schedule: Schedules) {
   const { text: result } = await generate(
-    runnerAgent,
+    runnerAgent(schedule.connectors),
     [
       user(
         `
