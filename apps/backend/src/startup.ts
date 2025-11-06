@@ -14,6 +14,9 @@ const env = z.object({
   BETTER_AUTH_URL: z.string(),
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_CLIENT_SECRET: z.string(),
+  BACKEND_BASE_URL: z.string().default('https://thing.january.sh'),
+  FRONTEND_BASE_URL: z.string().default('https://thing.january.sh'),
+  WHATSAPP_API_KEY: z.string(),
 });
 
 try {

@@ -1,12 +1,12 @@
 import { generate, user } from '@deepagents/agent';
-import { type Schedules, prisma } from '@thing/db';
+import { type Schedules, type User, prisma } from '@thing/db';
 import { Client } from '@upstash/qstash';
 import { Hono } from 'hono';
 import * as uuid from 'uuid';
 import { z } from 'zod';
 
 import channels from '../core/channels.ts';
-import { runnerAgent, titleGeneratorAgent } from '../faye/v2.ts';
+import { conciseSyntheizerAgent, runnerAgent } from '../faye/v2.ts';
 import { authenticate } from '../middlewares/middleware.ts';
 import { validate } from '../middlewares/validator.ts';
 
@@ -20,6 +20,7 @@ import { validate } from '../middlewares/validator.ts';
 
 type WithSlash<T extends string> = `/${T}`;
 const client = new Client();
+
 function scheduleRun(
   url: WithSlash<string>,
   cron: string,
@@ -27,7 +28,7 @@ function scheduleRun(
 ) {
   return client.schedules.create({
     cron,
-    destination: `https://thing.january.sh${url}`,
+    destination: `${process.env.BACKEND_BASE_URL}${url}`,
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -364,9 +365,9 @@ export default async function (router: Hono) {
         include: { user: true },
       });
 
-      const { result, title } = await executeSchedule(schedule, true);
+      const { result, title, summary } = await executeSchedule(schedule, true);
 
-      return c.json({ result, title });
+      return c.json({ result, title, summary });
     },
   );
 
@@ -474,22 +475,23 @@ async function runSchedule(schedule: Schedules) {
     ],
     {},
   );
-  const { text: title } = await generate(
-    titleGeneratorAgent,
+  const { experimental_output: metadata } = await generate(
+    conciseSyntheizerAgent,
     [
       user(
         `
         <ScheduleTitle>${schedule.title}</ScheduleTitle>
         <ScheduleInstructions>${schedule.instructions}</ScheduleInstructions>
         <RunResult>${result}</RunResult>
-        <Goal>Based on the above, generate a concise and informative title for this schedule run result.</Goal>
-        <Important>Your response will be used as is to be displayed in the UI.</Important>
+        <Goal>Based on the above, generate a concise and informative title and a brief summary for this schedule run result.</Goal>
+        <Important>Your response will be used as is to be displayed in the UI and sent through channels like whatsapp and email.</Important>
         `,
       ),
     ],
     {},
   );
-  return { result, title };
+
+  return { result, title: metadata.title, summary: metadata.summary };
 }
 
 /**
@@ -499,7 +501,7 @@ async function runSchedule(schedule: Schedules) {
  * @returns The execution result and generated title
  */
 async function executeSchedule(
-  schedule: Schedules & { user: { email: string } },
+  schedule: Schedules & { user: User },
   broadcast: boolean,
 ) {
   // Create schedule run record
@@ -511,7 +513,7 @@ async function executeSchedule(
   });
 
   // Execute the schedule
-  const { result, title } = await runSchedule(schedule);
+  const { result, title, summary } = await runSchedule(schedule);
 
   // Update record with results
   await prisma.scheduleRuns.update({
@@ -523,25 +525,20 @@ async function executeSchedule(
     },
   });
 
-  // Send notifications to all configured channels if broadcast is enabled
   if (broadcast) {
-    for (const channel of schedule.channels) {
-      try {
-        if (channel === 'email') {
-          await channels.email({
-            to: [schedule.user.email],
-            subject: `Prompt: ${schedule.title}`,
-            html: `<h1>${title}</h1><p>${result}</p>`,
-          });
-        } else if (channel === 'whatsapp') {
-          await channels.whatsapp();
-        }
-      } catch (error) {
-        console.error(`Failed to send notification via ${channel}:`, error);
-        // Continue with other channels even if one fails
-      }
+    const runUrl = `${process.env.FRONTEND_BASE_URL}?id=${schedule.id}&runId=${record.id}`;
+    for (const it of schedule.channels) {
+      const channelName = it as keyof typeof channels;
+      const send = channels[channelName];
+      if (!send) continue;
+      await send({
+        user: schedule.user,
+        title,
+        summary,
+        runUrl,
+      });
     }
   }
 
-  return { result, title };
+  return { result, title, summary };
 }

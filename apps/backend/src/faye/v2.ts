@@ -1,6 +1,7 @@
 import { groq } from '@ai-sdk/groq';
 import { agent } from '@deepagents/agent';
 import { scratchpad_tool } from '@deepagents/toolbox';
+import z from 'zod';
 
 import { hackerNewsConnector } from './connectors/hackernews.ts';
 
@@ -80,8 +81,21 @@ export const runnerAgent = agent({
   },
 });
 
-export const titleGeneratorAgent = agent({
-  name: 'ScheduleTitleGenerator',
+export const conciseSyntheizerAgent = agent({
+  name: 'ConciseSyntheizerAgent',
   model: groq('openai/gpt-oss-20b'),
-  prompt: '',
+  prompt: `
+    <SystemContext>
+      You analyze schedule run results and craft succinct metadata that helps humans understand what happened at a glance.
+    </SystemContext>
+
+    <Guidelines>
+      - Create a short, descriptive title that reflects the key outcome of the run. Keep it under 80 characters when possible.
+      - Write a brief summary (max ~240 characters) highlighting the most important insight or takeaway.
+    </Guidelines>
+  `,
+  output: z.object({
+    title: z.string().min(1),
+    summary: z.string().min(1),
+  }),
 });

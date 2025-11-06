@@ -2222,11 +2222,15 @@
                     },
                     "title": {
                       "type": "string"
+                    },
+                    "summary": {
+                      "type": "string"
                     }
                   },
                   "required": [
                     "result",
-                    "title"
+                    "title",
+                    "summary"
                   ],
                   "additionalProperties": false
                 }
