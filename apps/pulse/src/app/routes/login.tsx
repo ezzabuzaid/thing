@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router';
 
 import { authClient } from '../auth-client.ts';
+import FluidParticlesBackground from '../components/Particles.tsx';
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -78,57 +79,63 @@ export default function Login() {
   }, [isLoading]);
 
   return (
-    <div className="bg-background text-foreground">
-      <div
-        className="flex min-h-screen flex-col items-center justify-center px-4"
-        style={{ minHeight: 'max(884px, 100dvh)' }}
-      >
-        <div className="w-full max-w-sm text-center">
-          <header className="mb-12">
-            <h1 className="text-foreground text-3xl font-bold tracking-tight">
-              Thing
-            </h1>
-            <p className="text-muted-foreground mt-2 text-base">
-              The digital you.
-            </p>
-          </header>
-          <main className="space-y-6">
-            <button
-              type="button"
-              onClick={handleGoogleSignIn}
-              disabled={isLoading}
-              className="border-border bg-card text-card-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background flex h-12 w-full items-center justify-center gap-x-2 rounded-lg border px-5 font-semibold shadow-sm transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <GoogleIcon className="size-6" />
-              <span>{isLoading ? 'Redirecting…' : 'Sign in with Google'}</span>
-            </button>
-            {errorMessage ? (
-              <p className="text-destructive text-sm" role="alert">
-                {errorMessage}
+    <FluidParticlesBackground
+      className="flex items-center justify-center"
+     >
+      <div className="text-foreground z-10">
+        <div
+          className="flex min-h-screen flex-col items-center justify-center px-4"
+          style={{ minHeight: 'max(884px, 100dvh)' }}
+        >
+          <div className="w-full max-w-sm text-center">
+            <header className="mb-12">
+              <h1 className="text-foreground text-3xl font-bold tracking-tight">
+                Thing
+              </h1>
+              <p className="text-muted-foreground mt-2 text-base">
+                The digital you.
               </p>
-            ) : null}
-          </main>
-          <footer className="mt-24">
-            <p className="text-muted-foreground text-center text-xs">
-              By continuing, you agree to our{' '}
-              <a
-                className="text-primary font-medium hover:underline"
-                href="/legal/terms-services"
+            </header>
+            <main className="space-y-6">
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={isLoading}
+                className="border-border bg-card text-card-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background flex h-12 w-full items-center justify-center gap-x-2 rounded-lg border px-5 font-semibold shadow-sm transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Terms of Service
-              </a>{' '}
-              and{' '}
-              <a
-                className="text-primary font-medium hover:underline"
-                href="/legal/privacy-policy"
-              >
-                Privacy Policy
-              </a>
-              .
-            </p>
-          </footer>
+                <GoogleIcon className="size-6" />
+                <span>
+                  {isLoading ? 'Redirecting…' : 'Sign in with Google'}
+                </span>
+              </button>
+              {errorMessage ? (
+                <p className="text-destructive text-sm" role="alert">
+                  {errorMessage}
+                </p>
+              ) : null}
+            </main>
+            <footer className="mt-8">
+              <p className="text-muted-foreground text-center text-xs">
+                By continuing, you agree to our{' '}
+                <a
+                  className="text-primary font-medium hover:underline"
+                  href="/legal/terms-services"
+                >
+                  Terms of Service
+                </a>{' '}
+                and{' '}
+                <a
+                  className="text-primary font-medium hover:underline"
+                  href="/legal/privacy-policy"
+                >
+                  Privacy Policy
+                </a>
+                .
+              </p>
+            </footer>
+          </div>
         </div>
       </div>
-    </div>
+    </FluidParticlesBackground>
   );
 }

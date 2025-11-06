@@ -32,13 +32,13 @@ import {
   useAction,
 } from '@thing/ui';
 import React from 'react';
-import { useSearchParams } from 'react-router';
 import { z } from 'zod';
 
 import SelectorChips from '../../components/ChipSelector.tsx';
 import { CronBuilder } from '../../components/CronBuilder.tsx';
 import { useChannels } from '../../hooks/useChannels.ts';
 import { useConnectors } from '../../hooks/useConnectors.ts';
+import { useScheduleId } from './hooks/useScheduleId.ts';
 
 const createScheduleSchema = z.object({
   title: z.string().min(1, { message: 'Title is required' }),
@@ -52,7 +52,7 @@ export default function CreateScheduleForm() {
   const createMutation = useAction('POST /schedules', {
     invalidate: ['GET /schedules'],
   });
-  const [, setSearchParams] = useSearchParams();
+  const [, setScheduleId] = useScheduleId();
   const connectorsQuery = useConnectors();
   const channelsQuery = useChannels();
   const [open, setOpen] = React.useState(false);
@@ -78,7 +78,7 @@ export default function CreateScheduleForm() {
             enabled: value.enabled,
             connectors: value.connectors,
           });
-          setSearchParams({ id: created.id });
+          setScheduleId(created.id);
           setOpen(false);
           form.reset();
           return;
@@ -141,10 +141,7 @@ export default function CreateScheduleForm() {
         name="instructions"
         children={(field) => (
           <div className="grid gap-2">
-            <Label
-              htmlFor="create-sched-instructions"
-              className="font-medium"
-            >
+            <Label htmlFor="create-sched-instructions" className="font-medium">
               Instructions
             </Label>
             <Textarea

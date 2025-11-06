@@ -23,12 +23,13 @@ import {
 } from '@thing/shadcn';
 import { useData } from '@thing/ui';
 import { CalendarSync, StoreIcon } from 'lucide-react';
-import { Link, useSearchParams } from 'react-router';
+import { Link } from 'react-router';
 
 import { NavUserDropdown } from '../../components/NavUserDropdown.tsx';
 import { cronTitle, formatRelativeTime } from '../../logic/time.ts';
 import CreateScheduleForm from './CreateScheduleForm.tsx';
 import { DetailsPane } from './ScheduleDetails.tsx';
+import { useScheduleId } from './hooks/useScheduleId.ts';
 import {
   FREQUENCY_ORDER,
   getFrequencyLabel,
@@ -37,19 +38,21 @@ import {
 
 export default function Schedules() {
   const { data, isLoading } = useData('GET /schedules');
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [scheduleId, setScheduleId] = useScheduleId();
   const isMobile = useIsMobile();
-
-  const selectedId = searchParams.get('id') ?? null;
 
   if (isMobile) {
     return (
       <ScheduleMobile
         data={data}
         isLoading={isLoading}
-        selectedId={selectedId}
-        onSelect={(id) => setSearchParams({ id })}
-        onClose={() => setSearchParams({})}
+        selectedId={scheduleId}
+        onSelect={(id, runId) => {
+          setScheduleId(id, runId);
+        }}
+        onClose={() => {
+          setScheduleId(null);
+        }}
       />
     );
   }
@@ -67,9 +70,9 @@ export default function Schedules() {
           <SchedulesList
             response={data}
             isLoading={isLoading}
-            selectedId={selectedId}
-            onSelect={(id) => {
-              setSearchParams({ id });
+            selectedId={scheduleId}
+            onSelect={(id, runId) => {
+              setScheduleId(id, runId);
             }}
           />
         </SidebarContent>
@@ -103,7 +106,7 @@ export default function Schedules() {
       </Sidebar>
       <SidebarInset>
         <DetailsPane
-          selectedId={selectedId}
+          selectedId={scheduleId}
           className="mx-auto w-full max-w-4xl"
         />
       </SidebarInset>
@@ -121,7 +124,7 @@ function ScheduleMobile({
   data: ListSchedules | undefined;
   isLoading: boolean;
   selectedId: string | null;
-  onSelect: (id: string) => void;
+  onSelect: (id: string, runId: string | null) => void;
   onClose: () => void;
 }) {
   return (
@@ -196,7 +199,7 @@ function SchedulesGrid({
   onSelect,
 }: {
   schedules: ListSchedules['records'];
-  onSelect: (id: string) => void;
+  onSelect: (id: string, runId: string | null) => void;
 }) {
   const groupedSchedules = groupSchedulesByFrequency(schedules);
 
@@ -217,7 +220,9 @@ function SchedulesGrid({
                 <Card
                   key={schedule.id}
                   className="hover:bg-accent cursor-pointer rounded-2xl p-4 transition-colors"
-                  onClick={() => onSelect(schedule.id)}
+                  onClick={() =>
+                    onSelect(schedule.id, schedule.runs?.[0]?.id ?? null)
+                  }
                 >
                   <div className="space-y-2">
                     {/* Title and Status */}
@@ -267,7 +272,7 @@ function SchedulesList({
   response: ListSchedules | undefined;
   isLoading: boolean;
   selectedId: string | null;
-  onSelect: (id: string) => void;
+  onSelect: (id: string, runId: string | null) => void;
 }) {
   if (isLoading) {
     return (
@@ -311,7 +316,9 @@ function SchedulesList({
                   <SidebarMenuItem key={schedule.id}>
                     <SidebarMenuButton
                       isActive={selectedId === schedule.id}
-                      onClick={() => onSelect(schedule.id)}
+                      onClick={() => {
+                        onSelect(schedule.id, schedule.runs?.[0]?.id ?? null);
+                      }}
                       className="h-auto flex-col items-start gap-0"
                     >
                       <div className="flex w-full items-center gap-2">

@@ -13,7 +13,6 @@ import { useAction, useData } from '@thing/ui';
 import { CronExpressionParser } from 'cron-parser';
 import {
   Archive,
-  Bell,
   ChevronLeft,
   ChevronRight,
   PlayCircle,
@@ -21,7 +20,6 @@ import {
   X,
 } from 'lucide-react';
 import React from 'react';
-import { useSearchParams } from 'react-router';
 
 import { Message, MessageContent } from '../../elements/Message.tsx';
 import { Response } from '../../elements/Response.tsx';
@@ -35,6 +33,7 @@ import EditScheduleButton from './EditScheduleButton.tsx';
 import PauseScheduleButton from './PauseScheduleButton.tsx';
 import PublishToMarketplaceButton from './PublishToMarketplaceButton.tsx';
 import ResumeScheduleButton from './ResumeScheduleButton.tsx';
+import { useRunId, useScheduleId } from './hooks/useScheduleId.ts';
 
 export function DetailsPane({
   selectedId,
@@ -85,7 +84,7 @@ function ScheduleDetails({
     <div className={cn('flex h-full flex-col', className)}>
       <Header schedule={data} />
       {/* <Separator /> */}
-      <div className="flex-1 overflow-auto pt-0 p-4">
+      <div className="flex-1 overflow-auto p-4 pt-0">
         <RunsList
           runs={data.runs ?? []}
           cron={data.cron}
@@ -97,17 +96,14 @@ function ScheduleDetails({
 }
 
 const Header = ({ schedule }: { schedule: GetScheduleById }) => {
-  const [, setSearchParams] = useSearchParams();
+  const [, setScheduleId] = useScheduleId();
   const runAction = useAction('POST /schedules/run', {
     invalidate: ['GET /schedules/{id}'],
   });
   const archiveAction = useAction('DELETE /schedules/{id}', {
     invalidate: ['GET /schedules'],
     onSuccess: () => {
-      setSearchParams((it) => {
-        it.delete('id');
-        return it;
-      });
+      setScheduleId(null);
     },
   });
 
@@ -140,10 +136,7 @@ const Header = ({ schedule }: { schedule: GetScheduleById }) => {
             size="icon"
             variant="ghost"
             onClick={() => {
-              setSearchParams((it) => {
-                it.delete('id');
-                return it;
-              });
+              setScheduleId(null);
             }}
             aria-label="Close schedule details"
             title="Close"
@@ -186,8 +179,6 @@ const Header = ({ schedule }: { schedule: GetScheduleById }) => {
         </Button>
       </div>
 
-
-
       <div className="text-muted-foreground line-clamp-3 text-sm">
         {schedule.instructions}
       </div>
@@ -204,27 +195,28 @@ const RunsList = ({
   cron: string;
   enabled: boolean;
 }) => {
-  const [selectedRunId, setSelectedRunId] = React.useState<string | null>(null);
-
-  // Calculate index during render - no effect needed!
-  const currentIndex = React.useMemo(() => {
-    if (selectedRunId) {
-      const idx = runs.findIndex((r) => r.id === selectedRunId);
-      if (idx !== -1) return idx;
+  const [runId, setRunId] = useRunId();
+  React.useEffect(() => {
+    if (!runId) return;
+    const exists = runs.some((run) => run.id === runId);
+    if (!exists) {
+      setRunId(null);
     }
-    // Default to latest run
+  }, [runId, runs, setRunId]);
+
+  const currentIndex = React.useMemo(() => {
+    const idx = runs.findIndex((r) => r.id === runId);
+    if (idx !== -1) return idx;
     return runs.length - 1;
-  }, [runs, selectedRunId]);
+  }, [runs, runId]);
 
   if (runs.length === 0) {
     return (
       <div className="text-muted-foreground py-10 text-center text-sm">
         {!enabled ? (
           'Schedule is paused. Resume to see next run time.'
-        ) : nextRun ? (
-          <>Next run {formatRelativeTime(nextRun(cron))}</>
         ) : (
-          'No runs yet. Use "Run now" to trigger one.'
+          <>Next run {formatRelativeTime(nextRun(cron))}</>
         )}
       </div>
     );
@@ -236,18 +228,18 @@ const RunsList = ({
 
   const goToPrevious = () => {
     if (hasPrevious) {
-      setSelectedRunId(runs[currentIndex - 1].id);
+      setRunId(runs[currentIndex - 1].id);
     }
   };
 
   const goToNext = () => {
     if (hasNext) {
-      setSelectedRunId(runs[currentIndex + 1].id);
+      setRunId(runs[currentIndex + 1].id);
     }
   };
 
   const goToLatest = () => {
-    setSelectedRunId(null); // null = auto-select latest
+    setRunId(runs[runs.length - 1].id);
   };
 
   return (
