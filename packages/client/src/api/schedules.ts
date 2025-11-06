@@ -60,6 +60,37 @@ export default {
       return result.data;
     },
   },
+  'GET /schedules/channels': {
+    schema: schedules.getScheduleChannelsSchema,
+    output: [
+      http.Ok<outputs.GetScheduleChannels>,
+      http.BadRequest<outputs.GetScheduleChannels400>,
+      http.Unauthorized<outputs.UnauthorizedErr>,
+    ],
+    toRequest(input: z.input<typeof schedules.getScheduleChannelsSchema>) {
+      return toRequest(
+        'GET /schedules/channels',
+        empty(input, {
+          inputHeaders: [],
+          inputQuery: [],
+          inputBody: [],
+          inputParams: [],
+        }),
+      );
+    },
+    async dispatch(
+      input: z.input<typeof schedules.getScheduleChannelsSchema>,
+      options: {
+        signal?: AbortSignal;
+        interceptors: Interceptor[];
+        fetch: z.infer<typeof fetchType>;
+      },
+    ) {
+      const dispatcher = new Dispatcher(options.interceptors, options.fetch);
+      const result = await dispatcher.send(this.toRequest(input), this.output);
+      return result.data;
+    },
+  },
   'POST /schedules': {
     schema: schedules.createScheduleSchema,
     output: [
@@ -73,7 +104,14 @@ export default {
         json(input, {
           inputHeaders: [],
           inputQuery: [],
-          inputBody: ['title', 'instructions', 'cron', 'enabled', 'connectors'],
+          inputBody: [
+            'title',
+            'instructions',
+            'cron',
+            'enabled',
+            'connectors',
+            'channels',
+          ],
           inputParams: [],
         }),
       );
@@ -166,7 +204,13 @@ export default {
         json(input, {
           inputHeaders: [],
           inputQuery: [],
-          inputBody: ['title', 'instructions', 'cron', 'connectors'],
+          inputBody: [
+            'title',
+            'instructions',
+            'cron',
+            'connectors',
+            'channels',
+          ],
           inputParams: ['id'],
         }),
       );
@@ -246,26 +290,26 @@ export default {
       return result.data;
     },
   },
-  'POST /schedules/{id}/run': {
-    schema: schedules.testRunSchema,
+  'POST /schedules/run': {
+    schema: schedules.runScheduleSchema,
     output: [
-      http.Ok<outputs.TestRun>,
-      http.BadRequest<outputs.TestRun400>,
+      http.Ok<outputs.RunSchedule>,
+      http.BadRequest<outputs.RunSchedule400>,
       http.Unauthorized<outputs.UnauthorizedErr>,
     ],
-    toRequest(input: z.input<typeof schedules.testRunSchema>) {
+    toRequest(input: z.input<typeof schedules.runScheduleSchema>) {
       return toRequest(
-        'POST /schedules/{id}/run',
+        'POST /schedules/run',
         json(input, {
           inputHeaders: [],
           inputQuery: [],
-          inputBody: ['source'],
-          inputParams: ['id'],
+          inputBody: ['id'],
+          inputParams: [],
         }),
       );
     },
     async dispatch(
-      input: z.input<typeof schedules.testRunSchema>,
+      input: z.input<typeof schedules.runScheduleSchema>,
       options: {
         signal?: AbortSignal;
         interceptors: Interceptor[];

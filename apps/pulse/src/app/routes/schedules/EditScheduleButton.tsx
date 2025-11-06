@@ -7,10 +7,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
   Input,
   Label,
   Spinner,
   Textarea,
+  useIsMobile,
 } from '@thing/shadcn';
 import {
   FieldMessage,
@@ -24,6 +30,7 @@ import { z } from 'zod';
 
 import SelectorChips from '../../components/ChipSelector.tsx';
 import { CronBuilder } from '../../components/CronBuilder.tsx';
+import { useChannels } from '../../hooks/useChannels.ts';
 import { useConnectors } from '../../hooks/useConnectors.ts';
 
 export default function EditScheduleButton({
@@ -32,6 +39,36 @@ export default function EditScheduleButton({
   schedule: GetScheduleById;
 }) {
   const [open, setOpen] = React.useState(false);
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={setOpen}>
+        <DrawerTrigger asChild>
+          <Button
+            type="button"
+            size="icon"
+            variant="outline"
+            aria-label="Edit schedule"
+            title="Edit schedule"
+          >
+            <Pencil className="size-4" />
+          </Button>
+        </DrawerTrigger>
+        <DrawerContent className="max-h-[90vh]">
+          <DrawerHeader>
+            <DrawerTitle>Edit Schedule</DrawerTitle>
+          </DrawerHeader>
+          <div className="overflow-auto px-4">
+            <EditScheduleForm
+              schedule={schedule}
+              onSuccess={() => setOpen(false)}
+            />
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -64,6 +101,7 @@ const editScheduleSchema = z.object({
   cron: z.string().min(1, { message: 'Schedule is required' }),
   instructions: z.string().min(1, { message: 'Instructions are required' }),
   connectors: z.array(z.string()),
+  channels: z.array(z.string()),
 });
 
 function EditScheduleForm({
@@ -77,6 +115,7 @@ function EditScheduleForm({
     invalidate: ['GET /schedules', 'GET /schedules/{id}'],
   });
   const connectorsQuery = useConnectors();
+  const channelsQuery = useChannels();
 
   const form = useForm({
     defaultValues: {
@@ -84,6 +123,7 @@ function EditScheduleForm({
       cron: schedule.cron,
       instructions: schedule.instructions,
       connectors: schedule.connectors ?? [],
+      channels: schedule.channels ?? ['email'],
     },
     validators: {
       onSubmit: editScheduleSchema,
@@ -179,6 +219,21 @@ function EditScheduleForm({
             <Label className="font-medium">Supported connectors</Label>
             <SelectorChips
               options={connectorsQuery?.connectors}
+              value={field.state.value}
+              onChange={(its) => field.handleChange(its)}
+            />
+            <FieldMessage errors={field.state.meta.errors} />
+          </div>
+        )}
+      />
+
+      <form.Field
+        name="channels"
+        children={(field) => (
+          <div className="grid gap-2">
+            <Label className="font-medium">Notification channels</Label>
+            <SelectorChips
+              options={channelsQuery?.channels}
               value={field.state.value}
               onChange={(its) => field.handleChange(its)}
             />

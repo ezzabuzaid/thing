@@ -1144,6 +1144,64 @@
         }
       }
     },
+    "/schedules/channels": {
+      "get": {
+        "operationId": "getScheduleChannels",
+        "parameters": [],
+        "tags": [
+          "schedules"
+        ],
+        "description": "List available notification channels for schedules.",
+        "responses": {
+          "200": {
+            "description": "Response for 200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "channels": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "channels"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ValidationError"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedErr"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/schedules": {
       "post": {
         "operationId": "createSchedule",
@@ -1185,6 +1243,19 @@
                       "type": "string"
                     },
                     "default": []
+                  },
+                  "channels": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "email",
+                        "whatsapp"
+                      ]
+                    },
+                    "default": [
+                      "email"
+                    ]
                   }
                 }
               }
@@ -1212,6 +1283,12 @@
                       "type": "string"
                     },
                     "connectors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "channels": {
                       "type": "array",
                       "items": {
                         "type": "string"
@@ -1246,6 +1323,7 @@
                     "title",
                     "updatedAt",
                     "connectors",
+                    "channels",
                     "instructions",
                     "cron",
                     "runnerId",
@@ -1323,62 +1401,138 @@
                     "records": {
                       "type": "array",
                       "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "userId": {
-                            "type": "string"
-                          },
-                          "title": {
-                            "type": "string"
-                          },
-                          "updatedAt": {
-                            "type": "string"
-                          },
-                          "connectors": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
-                          },
-                          "instructions": {
-                            "type": "string"
-                          },
-                          "cron": {
-                            "type": "string"
-                          },
-                          "runnerId": {
-                            "type": "string"
-                          },
-                          "enabled": {
-                            "type": "boolean"
-                          },
-                          "deletedAt": {
-                            "anyOf": [
-                              {
-                                "type": "null"
-                              },
-                              {
-                                "type": "string"
+                        "allOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "runs": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "result": {
+                                      "anyOf": [
+                                        {
+                                          "type": "null"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
+                                    },
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "title": {
+                                      "anyOf": [
+                                        {
+                                          "type": "null"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
+                                    },
+                                    "scheduleId": {
+                                      "type": "string"
+                                    },
+                                    "runAt": {
+                                      "type": "string"
+                                    },
+                                    "completedAt": {
+                                      "anyOf": [
+                                        {
+                                          "type": "null"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "result",
+                                    "id",
+                                    "title",
+                                    "scheduleId",
+                                    "runAt",
+                                    "completedAt"
+                                  ],
+                                  "additionalProperties": false
+                                }
                               }
-                            ]
+                            },
+                            "required": [
+                              "runs"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "userId": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "updatedAt": {
+                                "type": "string"
+                              },
+                              "connectors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "channels": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "instructions": {
+                                "type": "string"
+                              },
+                              "cron": {
+                                "type": "string"
+                              },
+                              "runnerId": {
+                                "type": "string"
+                              },
+                              "enabled": {
+                                "type": "boolean"
+                              },
+                              "deletedAt": {
+                                "anyOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "userId",
+                              "title",
+                              "updatedAt",
+                              "connectors",
+                              "channels",
+                              "instructions",
+                              "cron",
+                              "runnerId",
+                              "enabled",
+                              "deletedAt"
+                            ],
+                            "additionalProperties": false
                           }
-                        },
-                        "required": [
-                          "id",
-                          "userId",
-                          "title",
-                          "updatedAt",
-                          "connectors",
-                          "instructions",
-                          "cron",
-                          "runnerId",
-                          "enabled",
-                          "deletedAt"
-                        ],
-                        "additionalProperties": false
+                        ]
                       }
                     },
                     "pagination": {
@@ -1561,6 +1715,12 @@
                             "type": "string"
                           }
                         },
+                        "channels": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
                         "instructions": {
                           "type": "string"
                         },
@@ -1590,6 +1750,7 @@
                         "title",
                         "updatedAt",
                         "connectors",
+                        "channels",
                         "instructions",
                         "cron",
                         "runnerId",
@@ -1671,6 +1832,16 @@
                       "type": "string"
                     },
                     "default": []
+                  },
+                  "channels": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "email",
+                        "whatsapp"
+                      ]
+                    }
                   }
                 }
               }
@@ -1698,6 +1869,12 @@
                       "type": "string"
                     },
                     "connectors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "channels": {
                       "type": "array",
                       "items": {
                         "type": "string"
@@ -1732,6 +1909,7 @@
                     "title",
                     "updatedAt",
                     "connectors",
+                    "channels",
                     "instructions",
                     "cron",
                     "runnerId",
@@ -1812,6 +1990,12 @@
                         "type": "string"
                       }
                     },
+                    "channels": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
                     "instructions": {
                       "type": "string"
                     },
@@ -1841,6 +2025,7 @@
                     "title",
                     "updatedAt",
                     "connectors",
+                    "channels",
                     "instructions",
                     "cron",
                     "runnerId",
@@ -1923,6 +2108,12 @@
                         "type": "string"
                       }
                     },
+                    "channels": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
                     "instructions": {
                       "type": "string"
                     },
@@ -1952,6 +2143,7 @@
                     "title",
                     "updatedAt",
                     "connectors",
+                    "channels",
                     "instructions",
                     "cron",
                     "runnerId",
@@ -1990,38 +2182,27 @@
         }
       }
     },
-    "/schedules/{id}/run": {
+    "/schedules/run": {
       "post": {
-        "operationId": "testRun",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
+        "operationId": "runSchedule",
+        "parameters": [],
         "tags": [
           "schedules"
         ],
-        "description": "Test run a schedule",
+        "description": "Run a schedule (called by Upstash). Sends notifications to all configured channels.",
         "requestBody": {
-          "required": false,
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
+                "required": [
+                  "id"
+                ],
                 "type": "object",
                 "properties": {
-                  "source": {
+                  "id": {
                     "type": "string",
-                    "enum": [
-                      "user",
-                      "system"
-                    ],
-                    "default": "system"
+                    "format": "uuid"
                   }
                 }
               }
@@ -2123,6 +2304,12 @@
                         "type": "string"
                       }
                     },
+                    "channels": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
                     "instructions": {
                       "type": "string"
                     },
@@ -2152,6 +2339,7 @@
                     "title",
                     "updatedAt",
                     "connectors",
+                    "channels",
                     "instructions",
                     "cron",
                     "runnerId",

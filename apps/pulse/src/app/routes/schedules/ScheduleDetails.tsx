@@ -13,6 +13,7 @@ import { useAction, useData } from '@thing/ui';
 import { CronExpressionParser } from 'cron-parser';
 import {
   Archive,
+  Bell,
   ChevronLeft,
   ChevronRight,
   PlayCircle,
@@ -35,7 +36,13 @@ import PauseScheduleButton from './PauseScheduleButton.tsx';
 import PublishToMarketplaceButton from './PublishToMarketplaceButton.tsx';
 import ResumeScheduleButton from './ResumeScheduleButton.tsx';
 
-export function DetailsPane({ selectedId,className }: { selectedId: string | null;className?:string }) {
+export function DetailsPane({
+  selectedId,
+  className,
+}: {
+  selectedId: string | null;
+  className?: string;
+}) {
   if (!selectedId) {
     return (
       <div className="text-muted-foreground flex h-full items-center justify-center p-6 text-sm">
@@ -77,8 +84,8 @@ function ScheduleDetails({
   return (
     <div className={cn('flex h-full flex-col', className)}>
       <Header schedule={data} />
-      <Separator />
-      <div className="flex-1 overflow-auto p-4">
+      {/* <Separator /> */}
+      <div className="flex-1 overflow-auto pt-0 p-4">
         <RunsList
           runs={data.runs ?? []}
           cron={data.cron}
@@ -91,7 +98,7 @@ function ScheduleDetails({
 
 const Header = ({ schedule }: { schedule: GetScheduleById }) => {
   const [, setSearchParams] = useSearchParams();
-  const runAction = useAction('POST /schedules/{id}/run', {
+  const runAction = useAction('POST /schedules/run', {
     invalidate: ['GET /schedules/{id}'],
   });
   const archiveAction = useAction('DELETE /schedules/{id}', {
@@ -106,8 +113,10 @@ const Header = ({ schedule }: { schedule: GetScheduleById }) => {
 
   return (
     <div className="flex flex-col gap-3 p-4">
-      <div className="mb-4 flex items-center justify-between">
-        <span className="text-lg font-semibold">{schedule.title}</span>
+      <div className="mb-2 flex items-center justify-between md:mb-4">
+        <span className="text-base font-semibold md:text-lg">
+          {schedule.title}
+        </span>
         <div className="flex items-center gap-1">
           <Button
             type="button"
@@ -143,7 +152,7 @@ const Header = ({ schedule }: { schedule: GetScheduleById }) => {
           </Button>
         </div>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <span className="flex items-center gap-2 text-sm">
           <Repeat className="size-4" />
           {cronTitle(schedule.cron)}
@@ -162,12 +171,7 @@ const Header = ({ schedule }: { schedule: GetScheduleById }) => {
           type="button"
           variant={'outline'}
           size="sm"
-          onClick={() =>
-            runAction.mutate({
-              id: schedule.id,
-              source: 'user',
-            })
-          }
+          onClick={() => runAction.mutate({ id: schedule.id })}
           disabled={runAction.isPending}
         >
           {runAction.isPending ? (
@@ -181,6 +185,8 @@ const Header = ({ schedule }: { schedule: GetScheduleById }) => {
           )}
         </Button>
       </div>
+
+
 
       <div className="text-muted-foreground line-clamp-3 text-sm">
         {schedule.instructions}

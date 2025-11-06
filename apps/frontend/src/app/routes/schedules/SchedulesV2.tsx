@@ -68,7 +68,12 @@ export default function SchedulesV2() {
             <StoreIcon className="mr-2 size-4" />
             Marketplace
           </Link>
-          <NavUserDropdown />
+
+          <SidebarMenu className="rounded-lg border">
+            <SidebarMenuItem>
+              <NavUserDropdown />
+            </SidebarMenuItem>
+          </SidebarMenu>
           <div className="text-muted-foreground flex items-center justify-center gap-2 text-xs">
             <Link to="/legal/privacy-policy" className="hover:underline">
               Privacy Policy

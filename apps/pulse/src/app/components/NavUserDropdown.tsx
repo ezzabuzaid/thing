@@ -12,7 +12,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
+  useIsMobile,
 } from '@thing/shadcn';
 import {
   BadgeCheck,
@@ -27,7 +27,7 @@ import { authClient } from '../auth-client';
 
 export function NavUserDropdown() {
   const { data: session } = authClient.useSession();
-  const { isMobile } = useSidebar();
+  const isMobile = useIsMobile();
 
   if (!session?.user) return null;
 

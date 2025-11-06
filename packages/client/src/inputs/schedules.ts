@@ -1,12 +1,17 @@
 import { z } from 'zod';
 
 export const listScheduleConnectorsSchema = z.object({}).catchall(z.unknown());
+export const getScheduleChannelsSchema = z.object({}).catchall(z.unknown());
 export const createScheduleSchema = z.object({
   title: z.string(),
   instructions: z.string(),
   cron: z.string(),
   enabled: z.boolean().optional(),
   connectors: z.array(z.string()).optional().default([]),
+  channels: z
+    .array(z.enum(['email', 'whatsapp']))
+    .optional()
+    .default(['email']),
 });
 export const listSchedulesSchema = z.object({
   page: z.number().gt(0).optional().default(1),
@@ -18,12 +23,10 @@ export const updateScheduleSchema = z.object({
   instructions: z.string().optional(),
   cron: z.string().optional(),
   connectors: z.array(z.string()).optional().default([]),
+  channels: z.array(z.enum(['email', 'whatsapp'])).optional(),
   id: z.string().uuid(),
 });
 export const archiveScheduleSchema = z.object({ id: z.string().uuid() });
 export const toggleScheduleSchema = z.object({ id: z.string().uuid() });
-export const testRunSchema = z.object({
-  source: z.enum(['user', 'system']).optional().default('system'),
-  id: z.string().uuid(),
-});
+export const runScheduleSchema = z.object({ id: z.string().uuid() });
 export const resumeScheduleSchema = z.object({ id: z.string().uuid() });

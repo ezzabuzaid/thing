@@ -5,6 +5,7 @@ model Schedules {
   cron         String
   runnerId     String
   connectors   String[] @default([])
+  channels     String[] @default(["email"])
 
   enabled Boolean @default(true)
 

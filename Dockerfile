@@ -16,7 +16,7 @@ ENV VITE_API_URL=/
 ENV NX_DAEMON=false
 
 # Cache .nx directory so it retrive from cache next time
-RUN --mount=type=cache,id=nx,target=/app/.nx ./node_modules/.bin/nx run-many -t build --projects backend,frontend -c production
+RUN --mount=type=cache,id=nx,target=/app/.nx ./node_modules/.bin/nx run-many -t build --projects backend,pulse -c production
 
 
 FROM builder AS packages
@@ -41,7 +41,7 @@ WORKDIR /app
 COPY --from=packages /app/all-dists ./packages
 
 # Frontend APPS
-COPY --from=builder /app/apps/frontend/dist ./apps/frontend/dist
+COPY --from=builder /app/apps/pulse/dist ./apps/pulse/dist
 
 
 # Backend APPS

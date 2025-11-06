@@ -81,7 +81,11 @@ export default function Home() {
           <NavItems items={sidebar} />
         </SidebarContent>
         <SidebarFooter>
-          <NavUserDropdown />
+          <SidebarMenu className="rounded-lg border">
+            <SidebarMenuItem>
+              <NavUserDropdown />
+            </SidebarMenuItem>
+          </SidebarMenu>
           <Separator />
           <SidebarTrigger />
         </SidebarFooter>

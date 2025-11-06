@@ -2,10 +2,10 @@ import { generate, user } from '@deepagents/agent';
 import { type Schedules, prisma } from '@thing/db';
 import { Client } from '@upstash/qstash';
 import { Hono } from 'hono';
-import { Resend } from 'resend';
 import * as uuid from 'uuid';
 import { z } from 'zod';
 
+import channels from '../core/channels.ts';
 import { runnerAgent, titleGeneratorAgent } from '../faye/v2.ts';
 import { authenticate } from '../middlewares/middleware.ts';
 import { validate } from '../middlewares/validator.ts';
@@ -17,17 +17,6 @@ import { validate } from '../middlewares/validator.ts';
 //   process.env.QSTASH_CURRENT_SIGNING_KEY = 'sig_7kYjw48mhY7kAjqNGcy6cr29RJ6r';
 //   process.env.QSTASH_NEXT_SIGNING_KEY = 'sig_5ZB6DVzB1wjE8S6rZ7eenA8Pdnhs';
 // }
-export const SCHEDULE_CONNECTORS: string[] = [
-  'web search',
-  'hackernews',
-  'reddit',
-  'twitter',
-  'github',
-  'gmail',
-  'notion',
-];
-
-export type ScheduleConnector = (typeof SCHEDULE_CONNECTORS)[number];
 
 type WithSlash<T extends string> = `/${T}`;
 const client = new Client();
@@ -38,7 +27,7 @@ function scheduleRun(
 ) {
   return client.schedules.create({
     cron,
-    destination: `https://january.sh${url}`,
+    destination: `https://thing.january.sh${url}`,
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -58,7 +47,31 @@ export default async function (router: Hono) {
     validate(() => ({})),
     async (c) => {
       return c.json({
-        connectors: SCHEDULE_CONNECTORS,
+        connectors: [
+          'web search',
+          'hackernews',
+          'reddit',
+          'twitter',
+          'github',
+          'gmail',
+          'notion',
+        ],
+      });
+    },
+  );
+
+  /**
+   * @openapi getScheduleChannels
+   * @tags schedules
+   * @description List available notification channels for schedules.
+   */
+  router.get(
+    '/schedules/channels',
+    authenticate(),
+    validate(() => ({})),
+    async (c) => {
+      return c.json({
+        channels: ['email', 'whatsapp'],
       });
     },
   );
@@ -86,16 +99,28 @@ export default async function (router: Hono) {
         select: payload.body.connectors,
         against: z.array(z.string()).optional().optional().default([]),
       },
+      channels: {
+        select: payload.body.channels,
+        against: z
+          .array(z.enum(['email', 'whatsapp']))
+          .optional()
+          .default(['email']),
+      },
     })),
     async (c) => {
-      const { title, instructions, cron, enabled, connectors } = c.var.input;
+      const { title, instructions, cron, enabled, connectors, channels } =
+        c.var.input;
 
       const schedule = await prisma.$transaction(async (tx) => {
         const id = uuid.v7();
 
-        const { scheduleId: runnerId } = await scheduleRun('/run', cron, {
-          id: id,
-        });
+        const { scheduleId: runnerId } = await scheduleRun(
+          '/schedules/run',
+          cron,
+          {
+            id: id,
+          },
+        );
         const record = await tx.schedules.create({
           data: {
             id,
@@ -106,6 +131,7 @@ export default async function (router: Hono) {
             enabled: enabled ?? true,
             runnerId,
             connectors: connectors ? Array.from(new Set(connectors)) : [],
+            channels: channels ? Array.from(new Set(channels)) : ['email'],
           },
         });
         return record;
@@ -143,6 +169,12 @@ export default async function (router: Hono) {
         skip: (page - 1) * pageSize,
         take: pageSize,
         orderBy: { updatedAt: 'desc' },
+        include: {
+          runs: {
+            orderBy: { runAt: 'desc' },
+            take: 1,
+          },
+        },
       });
 
       return c.json({
@@ -206,9 +238,14 @@ export default async function (router: Hono) {
         select: payload.body.connectors,
         against: z.array(z.string()).optional().optional().default([]),
       },
+      channels: {
+        select: payload.body.channels,
+        against: z.array(z.enum(['email', 'whatsapp'])).optional(),
+      },
     })),
     async (c) => {
-      const { id, title, instructions, cron, connectors } = c.var.input;
+      const { id, title, instructions, cron, connectors, channels } =
+        c.var.input;
 
       // Ensure user owns the schedule
       const existing = await prisma.schedules.findFirstOrThrow({
@@ -224,9 +261,11 @@ export default async function (router: Hono) {
           });
 
           // Create new Upstash schedule with new cron
-          const { scheduleId: newRunnerId } = await scheduleRun('/run', cron, {
-            id: existing.id,
-          });
+          const { scheduleId: newRunnerId } = await scheduleRun(
+            '/schedules/run',
+            cron,
+            { id: existing.id },
+          );
 
           // Update Prisma record with new data
           return await tx.schedules.update({
@@ -236,6 +275,9 @@ export default async function (router: Hono) {
               ...(instructions !== undefined && { instructions }),
               ...(connectors !== undefined && {
                 connectors: Array.from(new Set(connectors)),
+              }),
+              ...(channels !== undefined && {
+                channels: Array.from(new Set(channels)),
               }),
               cron,
               runnerId: newRunnerId,
@@ -254,6 +296,9 @@ export default async function (router: Hono) {
           ...(instructions !== undefined && { instructions }),
           ...(connectors !== undefined && {
             connectors: Array.from(new Set(connectors)),
+          }),
+          ...(channels !== undefined && {
+            channels: Array.from(new Set(channels)),
           }),
         },
       });
@@ -299,58 +344,27 @@ export default async function (router: Hono) {
   );
 
   /**
-   * @openapi testRun
+   * @openapi runSchedule
    * @tags schedules
-   * @description Test run a schedule
+   * @description Run a schedule (called by Upstash). Sends notifications to all configured channels.
    */
   router.post(
-    '/schedules/:id/run',
-    authenticate(),
-    validate((payload) => ({
+    '/schedules/run',
+    validate('application/json', (payload) => ({
       id: {
-        select: payload.params.id,
+        select: payload.body.id,
         against: z.string().uuid(),
-      },
-      source: {
-        select: payload.body.source,
-        against: z.enum(['user', 'system']).optional().default('system'),
       },
     })),
     async (c) => {
       const { id } = c.var.input;
 
-      const schedule = await prisma.schedules.findFirstOrThrow({
-        where: { id, userId: c.var.subject.id },
+      const schedule = await prisma.schedules.findUniqueOrThrow({
+        where: { id },
         include: { user: true },
       });
 
-      const record = await prisma.scheduleRuns.create({
-        data: {
-          scheduleId: schedule.id,
-          runAt: new Date(),
-        },
-      });
-
-      const { result, title } = await runSchedule(schedule);
-
-      await prisma.scheduleRuns.update({
-        where: { id: record.id },
-        data: {
-          completedAt: new Date(),
-          result: result,
-          title: title,
-        },
-      });
-
-      if (c.var.input.source === 'system') {
-        const resend = new Resend('re_KXkH8Wte_7nC3BFrXZiHsVFf68j7o8Vdi');
-        await resend.emails.send({
-          from: 'Acme <admin@schedules.january.sh>',
-          to: [schedule.user.email],
-          subject: `Prompt: ${schedule.title}`,
-          html: `<h1>${title}</h1><p>${result}</p>`,
-        });
-      }
+      const { result, title } = await executeSchedule(schedule, true);
 
       return c.json({ result, title });
     },
@@ -475,5 +489,59 @@ async function runSchedule(schedule: Schedules) {
     ],
     {},
   );
+  return { result, title };
+}
+
+/**
+ * Execute a schedule: create run record, execute, update record, and optionally broadcast to channels
+ * @param schedule - Schedule with user data included
+ * @param broadcast - If true, send notifications to all configured channels. If false, just return results.
+ * @returns The execution result and generated title
+ */
+async function executeSchedule(
+  schedule: Schedules & { user: { email: string } },
+  broadcast: boolean,
+) {
+  // Create schedule run record
+  const record = await prisma.scheduleRuns.create({
+    data: {
+      scheduleId: schedule.id,
+      runAt: new Date(),
+    },
+  });
+
+  // Execute the schedule
+  const { result, title } = await runSchedule(schedule);
+
+  // Update record with results
+  await prisma.scheduleRuns.update({
+    where: { id: record.id },
+    data: {
+      completedAt: new Date(),
+      result: result,
+      title: title,
+    },
+  });
+
+  // Send notifications to all configured channels if broadcast is enabled
+  if (broadcast) {
+    for (const channel of schedule.channels) {
+      try {
+        if (channel === 'email') {
+          await channels.email({
+            to: [schedule.user.email],
+            subject: `Prompt: ${schedule.title}`,
+            html: `<h1>${title}</h1><p>${result}</p>`,
+          });
+        } else if (channel === 'whatsapp') {
+          await channels.whatsapp();
+        }
+      } catch (error) {
+        console.error(`Failed to send notification via ${channel}:`, error);
+        // Continue with other channels even if one fails
+      }
+    }
+  }
+
   return { result, title };
 }

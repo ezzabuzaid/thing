@@ -14,6 +14,7 @@ export type GetScheduleById = {
   title: string;
   updatedAt: string;
   connectors: string[];
+  channels: string[];
   instructions: string;
   cron: string;
   runnerId: string;

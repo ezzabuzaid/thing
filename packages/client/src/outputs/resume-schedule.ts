@@ -6,6 +6,7 @@ export type ResumeSchedule = {
   title: string;
   updatedAt: string;
   connectors: string[];
+  channels: string[];
   instructions: string;
   cron: string;
   runnerId: string;
